@@ -208,7 +208,7 @@ const DashboardAnalytics: React.FC = () => (
             label
           >
             {sessionTypeData.map((entry, idx) => (
-              <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+              <Cell key={cell-${idx}} fill={COLORS[idx % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip />
@@ -221,9 +221,9 @@ const DashboardAnalytics: React.FC = () => (
 // Session Table with Search and Export
 const SessionsTable: React.FC<{ sessions: Session[] }> = ({ sessions }) => {
   const exportCSV = () => {
-    const header = `"Name","Type","Date & Time","Status"\n`;
+    const header = "Name","Type","Date & Time","Status"\n;
     const rows = sessions.map(
-      s => `"${s.name}","${s.type}","${s.date}","${s.status}"`
+      s => "${s.name}","${s.type}","${s.date}","${s.status}"
     ).join("\n");
     const csv = header + rows;
     const blob = new Blob([csv], { type: "text/csv" });

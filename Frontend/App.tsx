@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 // Import Layout
 import Layout from './src/components/layout/Layout';
-
+import SessionsPage from './src/pages/counselor/Sessions';
 import LandingPage from './src/pages/LandingPage';
 import StudentDashboard from './src/pages/student/StudentDashboard';
 import BookAppointmentPage from './src/pages/student/BookAppointmentPage';

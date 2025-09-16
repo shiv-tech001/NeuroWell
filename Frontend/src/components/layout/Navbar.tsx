@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Logo from '../../public/Logo.jpg';
 // Lucide Icons (install: npm install lucide-react)
 import { 
   LayoutDashboard, 
@@ -112,8 +113,9 @@ const Navbar: React.FC = () => {
     <nav className="bg-white shadow-sm border-b border-gray-200 fixed w-full z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <Link to="/" className="text-xl font-bold text-indigo-600 px-2">
-            MindfulU
+          <Link to="/" className="flex items-center">
+            <img src={Logo} alt="MindfulU Logo" className="h-12 w-auto" />
+            <h1 className="text-2xl font-bold text-purple-600 ml-1">NeuroWell</h1>
           </Link>
 
           {/* Desktop Navigation */}
@@ -154,13 +156,14 @@ const Navbar: React.FC = () => {
                 </button>
                 
                 {/* Notifications - Hidden on mobile */}
-                <button 
+                <Link 
+                  to="/notifications"
                   className="hidden sm:block relative text-lg text-gray-400 hover:text-purple-600 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-full p-1" 
                   aria-label="Notifications"
                 >
                   <Bell size={20} />
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-                </button>
+                </Link>
                 
                 {/* User Dropdown */}
                 <div className="relative" ref={dropdownRef}>
@@ -206,9 +209,7 @@ const Navbar: React.FC = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      'bg-purple-600 text-white hover:bg-purple-700'
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${'bg-purple-600 text-white hover:bg-purple-700'}`}
                   >
                     {link.label}
                   </Link>
@@ -238,17 +239,14 @@ const Navbar: React.FC = () => {
       )}
 
       {/* Mobile Menu */}
-      <div className={`fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
-        isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div className={`fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-6">
           {/* Mobile Menu Header */}
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                <img src={Logo} alt="MindfulU Logo" className="h-12 w-auto" />
               </div>
-              <span className="font-bold text-xl text-gray-800">MindfulU</span>
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
@@ -265,9 +263,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors ${
-                  isActive(link.to) ? 'text-purple-600 bg-purple-50' : ''
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors ${isActive(link.to) ? 'text-purple-600 bg-purple-50' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {React.cloneElement(link.icon, { 
@@ -292,7 +288,7 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => {
                   logout();
-                  setIsMobileMenuOpen(false)
+                  setIsMobileMenuOpen(false);
                 }}
                 className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >

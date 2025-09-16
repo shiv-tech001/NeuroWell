@@ -1,79 +1,79 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChatBubbleIcon, CalendarIcon, UsersIcon, ChartPieIcon, FacebookIcon, InstagramIcon, TwitterIcon } from '@components/icons';
+import { ChatBubbleIcon, CalendarIcon, UsersIcon } from '@components/icons';
 
 const LandingPage: React.FC = () => {
-    return (
-        <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
-                {/* Hero Section */}
-                <section id="home" className="container mx-auto px-6 pt-20 pb-16 text-center">
-                    <div className="max-w-4xl mx-auto">
-                        <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight mb-6">
-                            Your Journey to Mental<br />
-                            Wellness Starts Here
-                        </h1>
-                        <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-                            MindfulU provides students with the tools and support they need to thrive mentally and 
-                            emotionally. Explore our services and begin your path to a healthier, happier you.
-                        </p>
-                        <Link 
-                            to="/services" 
-                            className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-4 rounded-full transition shadow-lg hover:shadow-xl text-lg"
-                        >
-                            Explore Services
-                        </Link>
-                    </div>
-                </section>
+  return (
+    <div className="relative min-h-screen font-sans text-gray-700 overflow-hidden bg-gradient-to-br from-purple-200 via-purple-100 to-purple-300">
+      {/* Subtle Floating Light Highlights */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <span className="absolute top-24 left-32 w-24 h-24 bg-purple-400 rounded-full opacity-30 animate-pulse mix-blend-multiply filter blur-3xl"></span>
+        <span className="absolute top-72 right-28 w-36 h-36 bg-purple-300 rounded-full opacity-20 animate-pulse mix-blend-multiply filter blur-3xl"></span>
+        <span className="absolute bottom-32 left-24 w-40 h-40 bg-purple-300 rounded-full opacity-25 animate-pulse mix-blend-multiply filter blur-3xl"></span>
+      </div>
 
-                {/* Empowering Section */}
-                <section className="py-20 bg-white">
-                    <div className="container mx-auto px-6">
-                        <h2 className="text-4xl font-bold text-gray-800 text-center mb-16">
-                            Empowering Your Mental Health
-                        </h2>
-                        
-                        <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-                            {/* AI-Powered Chatbot */}
-                            <div className="text-center group">
-                                <div className="bg-purple-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition">
-                                    <ChatBubbleIcon className="h-10 w-10 text-purple-600" />
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-800 mb-4">AI-Powered Chatbot</h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Get instant support and guidance from our AI chatbot, available 24/7 to answer your 
-                                    questions and provide resources.
-                                </p>
-                            </div>
+      <div>
+   {/* Hero Section */}
+<section id="home" className="container mx-auto px-6 pt-24 pb-20 text-center">
+  <div className="max-w-3xl mx-auto">
+    <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-purple-900 mb-6 select-none animate-floatUpDown">
+      Your Journey to Mental<br />
+      Wellness Starts Here
+    </h1>
 
-                            {/* Peer Support Community */}
-                            <div className="text-center group">
-                                <div className="bg-purple-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition">
-                                    <UsersIcon className="h-10 w-10 text-purple-600" />
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-800 mb-4">Peer Support Community</h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Connect with fellow students in a safe and supportive community. Share experiences, 
-                                    offer encouragement, and build lasting connections.
-                                </p>
-                            </div>
+    <p className="text-lg text-purple-700 mb-12 leading-relaxed opacity-0 animate-fadeInDelayed">
+      NeuroWell provides students with the tools and support they need to thrive mentally and emotionally. 
+      Explore our services and begin your path to a healthier, happier you.
+    </p>
 
-                            {/* Easy Appointment Booking */}
-                            <div className="text-center group">
-                                <div className="bg-purple-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition">
-                                    <CalendarIcon className="h-10 w-10 text-purple-600" />
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-800 mb-4">Easy Appointment Booking</h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Schedule appointments with licensed therapists and counselors with ease. Find the 
-                                    right support at a time that works for you.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+    <Link
+      to="/services"
+      className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold px-10 py-4 rounded-full transition shadow-md hover:shadow-xl text-lg ring-2 ring-purple-300 animate-pulse-slower hover:scale-105"
+    >
+      Explore Services
+    </Link>
+  </div>
 
-                {/* How It Works Section */}
-                <section className="py-20 bg-gray-50">
+  {/* Animation styles moved to global CSS */}
+</section>
+
+
+
+
+        {/* Empowering Section */}
+        <section className="py-20 bg-transparent">
+          <div className="container mx-auto px-6">
+            <h2 className="text-4xl font-bold text-purple-900 text-center mb-16 select-none">
+              Empowering Your Mental Health
+            </h2>
+            <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+              {[{
+                icon: <ChatBubbleIcon className="h-10 w-10 text-purple-600" />,
+                title: "AI-Powered Chatbot",
+                description: "Get instant support and guidance from our AI chatbot, available 24/7 to answer your questions."
+              }, {
+                icon: <UsersIcon className="h-10 w-10 text-purple-600" />,
+                title: "Peer Support Community",
+                description: "Connect with fellow students in a safe and supportive community."
+              }, {
+                icon: <CalendarIcon className="h-10 w-10 text-purple-600" />,
+                title: "Easy Appointment Booking",
+                description: "Schedule appointments with licensed therapists and counselors easily."
+              }].map(({icon, title, description}, idx) => (
+                <div key={idx} className="text-center bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 cursor-pointer select-none">
+                  <div className="bg-purple-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    {icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-purple-900 mb-4">{title}</h3>
+                  <p className="text-purple-700 leading-relaxed">{description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        {/* how it works section */}
+
+        <section className="py-20 bg-gray-50">
                     <div className="container mx-auto px-6">
                         <h2 className="text-4xl font-bold text-gray-800 text-center mb-16">How It Works</h2>
                         
@@ -86,7 +86,7 @@ const LandingPage: React.FC = () => {
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                                         </svg>
                                     </div>
-                                    <p className="text-gray-500 text-lg">Watch this quick tour to see how MindfulU can support you.</p>
+                                    <p className="text-gray-500 text-lg">Watch this quick tour to see how NeuroWell can support you.</p>
                                 </div>
                             </div>
                         </div>
@@ -156,110 +156,59 @@ const LandingPage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Testimonials Section */}
-                <section className="py-20 bg-white">
-                    <div className="container mx-auto px-6">
-                        <h2 className="text-4xl font-bold text-gray-800 text-center mb-16">What Students Are Saying</h2>
-                        
-                        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            {/* Testimonial 1 */}
-                            <div className="bg-gray-50 p-8 rounded-2xl">
-                                <div className="flex items-center mb-4">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=50&h=50&fit=crop&crop=face" 
-                                        alt="Sophia Carter" 
-                                        className="w-12 h-12 rounded-full mr-4"
-                                    />
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800">Sophia Carter</h4>
-                                        <p className="text-sm text-gray-500">May 15, 2024</p>
-                                    </div>
-                                </div>
-                                <div className="flex mb-4">
-                                    {[...Array(5)].map((_, i) => (
-                                        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                    ))}
-                                </div>
-                                <p className="text-gray-600 leading-relaxed">
-                                    "MindfulU has been a game-changer for me. The AI chatbot is incredibly helpful, and the 
-                                    peer support community has made me feel less alone. Highly recommend!"
-                                </p>
-                            </div>
-
-                            {/* Testimonial 2 */}
-                            <div className="bg-gray-50 p-8 rounded-2xl">
-                                <div className="flex items-center mb-4">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face" 
-                                        alt="Ethan Bennett" 
-                                        className="w-12 h-12 rounded-full mr-4"
-                                    />
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800">Ethan Bennett</h4>
-                                        <p className="text-sm text-gray-500">Apr 27, 2024</p>
-                                    </div>
-                                </div>
-                                <div className="flex mb-4">
-                                    {[...Array(5)].map((_, i) => (
-                                        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                    ))}
-                                </div>
-                                <p className="text-gray-600 leading-relaxed">
-                                    "The appointment booking process was straightforward, and I found a therapist who 
-                                    truly understands my needs. The platform is user-friendly and effective."
-                                </p>
-                            </div>
-
-                            {/* Testimonial 3 */}
-                            <div className="bg-gray-50 p-8 rounded-2xl">
-                                <div className="flex items-center mb-4">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face" 
-                                        alt="Olivia Hayes" 
-                                        className="w-12 h-12 rounded-full mr-4"
-                                    />
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800">Olivia Hayes</h4>
-                                        <p className="text-sm text-gray-500">Mar 12, 2024</p>
-                                    </div>
-                                </div>
-                                <div className="flex mb-4">
-                                    {[...Array(5)].map((_, i) => (
-                                        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                    ))}
-                                </div>
-                                <p className="text-gray-600 leading-relaxed">
-                                    "I love the resources and support MindfulU offers. It's made a significant positive impact 
-                                    on my mental well-being. Thank you for creating each valuable service."
-                                </p>
-                            </div>
-                        </div>
+        {/* Testimonials Section */}
+        <section className="py-20 bg-purple-50 rounded-lg mx-10 md:mx-24 shadow-lg mt-16">
+          <div className="container mx-auto px-6">
+            <h2 className="text-4xl font-bold text-purple-900 text-center mb-16 select-none">What Students Are Saying</h2>
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {[{
+                name: "Sophia Carter",
+                date: "May 15, 2024",
+                text: `"NeuroWell has been a game-changer for me. The AI chatbot is incredibly helpful, and the peer support community has made me feel less alone. Highly recommend!"`,
+                img: "https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=50&h=50&fit=crop&crop=face"
+              }, {
+                name: "Ethan Bennett",
+                date: "Apr 27, 2024",
+                text: `"The appointment booking process was straightforward, and I found a therapist who truly understands my needs. The platform is user-friendly and effective."`,
+                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"
+              }, {
+                name: "Olivia Hayes",
+                date: "Mar 12, 2024",
+                text: `"I love the resources and support NeuroWell offers. It's made a significant positive impact on my mental well-being. Thank you for creating each valuable service."`,
+                img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face"
+              }].map(({name, date, text, img}, idx) => (
+                <div key={idx} className="bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition cursor-default">
+                  <div className="flex items-center mb-4">
+                    <img src={img} alt={name} className="w-12 h-12 rounded-full mr-4" />
+                    <div>
+                      <h4 className="font-semibold text-purple-900">{name}</h4>
+                      <p className="text-sm text-purple-700">{date}</p>
                     </div>
-                </section>
-
-                {/* Start Your Journey CTA */}
-                <section className="py-20 bg-gray-800 text-white">
-                    <div className="container mx-auto px-6 text-center">
-                        <h2 className="text-4xl font-bold mb-6">Ready to Start Your Mental Wellness Journey?</h2>
-                        <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                            Join thousands of students who have already begun their path to better mental health with MindfulU.
-                        </p>
-                        <Link 
-                            to="/register" 
-                            className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold px-10 py-4 rounded-full transition shadow-lg hover:shadow-xl text-lg"
-                        >
-                            Start Your Journey
-                        </Link>
-                    </div>
-                </section>
+                  </div>
+                  <p className="text-purple-700 italic">{text}</p>
+                </div>
+              ))}
             </div>
-    );
+          </div>
+        </section>
+
+        {/* Start Your Journey CTA */}
+        <section className="py-20 bg-purple-400 text-white text-center rounded-lg mx-16 mt-16 shadow-lg select-none">
+  <h2 className="text-4xl font-extrabold mb-6">Ready to Start Your Mental Wellness Journey?</h2>
+  <p className="text-xl mb-8 max-w-2xl mx-auto">
+    Join thousands of students who have already begun their path to better mental health with NeuroWell.
+  </p>
+  <Link
+    to="/register"
+    className="inline-block bg-white text-purple-700 font-bold px-12 py-4 rounded-full shadow-md hover:shadow-xl transition"
+  >
+    Start Your Journey
+  </Link>
+</section>
+
+      </div>
+    </div>
+  );
 };
 
 export default LandingPage;

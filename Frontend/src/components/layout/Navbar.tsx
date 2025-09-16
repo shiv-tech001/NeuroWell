@@ -156,13 +156,14 @@ const Navbar: React.FC = () => {
                 </button>
                 
                 {/* Notifications - Hidden on mobile */}
-                <button 
+                <Link 
+                  to="/notifications"
                   className="hidden sm:block relative text-lg text-gray-400 hover:text-purple-600 transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-full p-1" 
                   aria-label="Notifications"
                 >
                   <Bell size={20} />
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-                </button>
+                </Link>
                 
                 {/* User Dropdown */}
                 <div className="relative" ref={dropdownRef}>
@@ -287,7 +288,7 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => {
                   logout();
-                  setIsMobileMenuOpen(false)
+                  setIsMobileMenuOpen(false);
                 }}
                 className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >

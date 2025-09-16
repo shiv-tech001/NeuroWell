@@ -118,14 +118,14 @@ const Navbar: React.FC = () => {
   }
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 fixed w-full z-10">
+    <nav className="bg-white shadow-sm border-b border-gray-200 fixed w-full z-10 py-1">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20 items-center">
+        <div className="flex justify-between h-14 items-center">
           <Link to="/" className="flex items-center">
             <img 
-              src="/Logo.jpg" 
+              src="/Logo.png" 
               alt="NeuroWell Logo" 
-              className="h-20 w-auto rounded-lg" 
+              className="h-10 w-auto rounded-lg" 
             />
             <h1 className="text-2xl font-bold text-purple-600">NeuroWell</h1>
           </Link>

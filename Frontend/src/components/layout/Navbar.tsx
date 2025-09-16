@@ -121,7 +121,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-white border-b border-gray-200 fixed w-full z-10 py-1">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14 items-center">
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center focus:outline-none focus:ring-0">
             <img 
               src="/Logo.png" 
               alt="NeuroWell Logo" 
@@ -137,8 +137,7 @@ const Navbar: React.FC = () => {
                 key={link.to}
                 to={link.to}
                 className="relative flex items-center gap-1 text-gray-600 font-medium transition-colors duration-200 
-                            hover:text-purple-700 focus:text-purple-700 focus:outline-none focus:ring-2 
-                            focus:ring-purple-500 focus:ring-offset-2 group"
+                            hover:text-purple-700 focus:text-purple-700 focus:outline-none group"
                 aria-current={isActive(link.to) ? "page" : undefined}
               >
                 {React.cloneElement(link.icon, { 
@@ -273,17 +272,15 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Navigation Links */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-2">
             {currentNavLinks.map(link => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors ${isActive(link.to) ? 'text-purple-600 bg-purple-50' : ''}`}
+                className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {React.cloneElement(link.icon, { 
-                  className: `${isActive(link.to) ? 'text-purple-600' : 'text-gray-400'}` 
-                })}
+                {React.cloneElement(link.icon, { size: 18, className: 'text-gray-400' })}
                 <span className="font-medium">{link.label}</span>
               </Link>
             ))}

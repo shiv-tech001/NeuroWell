@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAuth } from '../../contexts/AuthContext';
 
 const engagementData = [
   { name: 'Week 1', value: 12 },
@@ -27,11 +28,28 @@ const MetricCard: React.FC<{title: string, value: string}> = ({title, value}) =>
 
 
 const AdminDashboard: React.FC = () => {
+    const { user, loading } = useAuth(); // Get user data from context
+    
+    // Show loading state while user data is being fetched
+    if (loading) {
+        return (
+            <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div className="bg-gray-50 min-h-screen p-6">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-text-dark">Admin Dashboard</h1>
-                <p className="text-text-medium">High-level overview of platform metrics, engagement statistics, and session graphs by user type.</p>
+                <p className="text-text-medium">Welcome back, {user?.fullName || 'Administrator'}! High-level overview of platform metrics, engagement statistics, and session graphs by user type.</p>
+                <div className="mt-2 text-sm text-gray-600">
+                    <span>Role: {user?.role || 'Admin'} | Email: {user?.email || 'admin@example.com'}</span>
+                </div>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-10">
                 <MetricCard title="Total Users" value="1,250" />

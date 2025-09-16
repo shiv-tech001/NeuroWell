@@ -6,6 +6,7 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
+import { useAuth } from '../../contexts/AuthContext';
 
 // Type Definitions
 type DoctorProfile = {
@@ -92,25 +93,31 @@ const CrisisBanner: React.FC<{ onRespondNow: () => void }> = ({ onRespondNow }) 
 
 // Doctor Details with Edit
 const DoctorDetails: React.FC<{
-  profile: DoctorProfile;
+  user: any;
   onEdit: () => void;
-}> = ({ profile, onEdit }) => (
+}> = ({ user, onEdit }) => (
   <header className="py-7 mb-4 flex items-center">
-    <img
-      src={profile.avatar}
-      alt={profile.name}
-      className="rounded-full w-16 h-16 mr-6 object-cover border"
-    />
+    {user?.avatar?.url ? (
+      <img
+        src={user.avatar.url}
+        alt={user.fullName}
+        className="rounded-full w-16 h-16 mr-6 object-cover border"
+      />
+    ) : (
+      <div className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl mr-6">
+        {user?.firstName?.[0] || 'D'}
+      </div>
+    )}
     <div>
       <div className="flex gap-2 items-center">
-        <h1 className="text-3xl font-bold text-gray-900">{profile.name}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{user?.fullName || 'Dr. Counselor'}</h1>
         <button className="p-1 rounded hover:bg-gray-100" onClick={onEdit}>
           <MdEdit size={22} />
         </button>
       </div>
-      <p className="text-lg text-gray-600">{profile.type}</p>
-      <p className="text-md text-gray-500">License No: {profile.license} | {profile.email}</p>
-      <p className="text-sm text-gray-400 mt-1">Experience: {profile.experience} | Location: {profile.location}</p>
+      <p className="text-lg text-gray-600">{user?.role === 'counselor' ? 'Licensed Counselor' : 'Psychologist'}</p>
+      <p className="text-md text-gray-500">License No: {user?.licenseNumber || 'N/A'} | {user?.email || 'email@example.com'}</p>
+      <p className="text-sm text-gray-400 mt-1">Experience: {user?.experience ? `${user.experience} years` : 'N/A'} | Specialization: {user?.specialization?.join(', ') || 'General'}</p>
     </div>
   </header>
 );
@@ -513,6 +520,7 @@ const ResourcesLibrary: React.FC = () => {
 
 // Main Dashboard Component
 const CounselorDashboard: React.FC = () => {
+  const { user, loading } = useAuth(); // Get user data from context
   const [profile, setProfile] = useState(defaultProfile);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -520,11 +528,23 @@ const CounselorDashboard: React.FC = () => {
     alert("Opening crisis intervention workflow!");
   };
 
+  // Show loading state while user data is being fetched
+  if (loading) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <main className="max-w-6xl mx-auto px-8 py-8">
         <div className="flex justify-between items-center">
-          <DoctorDetails profile={profile} onEdit={() => setEditOpen(true)} />
+          <DoctorDetails user={user} onEdit={() => setEditOpen(true)} />
           <NotificationDropdown />
         </div>
         {editOpen &&

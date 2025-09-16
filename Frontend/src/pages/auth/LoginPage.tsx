@@ -136,15 +136,9 @@ const LoginPage: React.FC = () => {
 
     try {
       setLoginInProgress(true);
-      const mockUser = {
-        id: `user-${Date.now()}`,
-        name: formData.email.split('@')[0].charAt(0).toUpperCase() + formData.email.split('@')[0].slice(1),
-        email: formData.email,
-        role: formData.role,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.email.split('@')[0])}&background=8b5cf6&color=fff`
-      };
-
-      login(mockUser);
+      
+      // Use the real authentication service
+      await login(formData.email, formData.password);
 
       if (formData.rememberMe) {
         localStorage.setItem('rememberMe', 'true');
@@ -152,7 +146,7 @@ const LoginPage: React.FC = () => {
 
       // Show success toast notification
       const roleDisplay = formData.role === 'student' ? 'Student' : 'Counselor';
-      toast.success(`Successfully logged in as ${roleDisplay}! Welcome back! 🎉`, {
+      toast.success(`Successfully logged in! Welcome back! 🎉`, {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -161,14 +155,10 @@ const LoginPage: React.FC = () => {
         draggable: true,
       });
 
-      // Add a small delay before navigation to allow toast to be seen
-      setTimeout(() => {
-        navigate(`/${formData.role}/dashboard`, { replace: true });
-        setLoginInProgress(false);
-      }, 1500);
+      // Navigation will be handled by the AuthContext useEffect
       
-    } catch (err) {
-      setErrors({ general: 'Invalid credentials. Please check your email and password.' });
+    } catch (err: any) {
+      setErrors({ general: err.message || 'Invalid credentials. Please check your email and password.' });
       setLoginInProgress(false);
     } finally {
       setIsLoading(false);
@@ -176,43 +166,11 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSocialLogin = async (provider: 'google' | 'github' | 'microsoft') => {
-    try {
-      setIsLoading(true);
-      setErrors({});
-      setLoginInProgress(true);
-      
-      const mockUser = {
-        id: `social-${provider}-${Date.now()}`,
-        name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
-        email: `user@${provider}.com`,
-        role: formData.role,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(provider)}&background=random`
-      };
-
-      login(mockUser);
-
-      // Show success toast notification for social login
-      const roleDisplay = formData.role === 'student' ? 'Student' : 'Counselor';
-      toast.success(`Successfully logged in as ${roleDisplay} via ${provider.charAt(0).toUpperCase() + provider.slice(1)}! 🎉`, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-
-      // Add a small delay before navigation to allow toast to be seen
-      setTimeout(() => {
-        navigate(`/${formData.role}/dashboard`, { replace: true });
-        setLoginInProgress(false);
-      }, 1500);
-    } catch (err) {
-      setErrors({ general: `Failed to login with ${provider}. Please try again.` });
-      setLoginInProgress(false);
-    } finally {
-      setIsLoading(false);
-    }
+    // Social login is not implemented with real backend yet
+    toast.info(`Social login with ${provider} will be available soon!`, {
+      position: "top-right",
+      autoClose: 3000,
+    });
   };
 
   const getRoleIcon = (role: string) => {

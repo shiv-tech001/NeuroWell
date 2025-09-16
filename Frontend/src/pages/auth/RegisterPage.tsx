@@ -22,7 +22,7 @@ const RegisterPage: React.FC = () => {
     });
     const navigate = useNavigate();
     const location = useLocation();
-    const { login, isAuthenticated } = useAuth();
+    const { login, register, isAuthenticated } = useAuth();
 
     useEffect(() => {
         // Redirect if already authenticated
@@ -69,10 +69,18 @@ const RegisterPage: React.FC = () => {
             setError('Please enter a password');
             return false;
         }
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters long');
+        if (formData.password.length < 8) {
+            setError('Password must be at least 8 characters long');
             return false;
         }
+        
+        // Enhanced password validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+        if (!passwordRegex.test(formData.password)) {
+            setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)');
+            return false;
+        }
+        
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return false;
@@ -90,34 +98,42 @@ const RegisterPage: React.FC = () => {
         setError('');
 
         try {
-            // Validate form data
-            if (!formData.agreeToTerms) {
-                setError('You must agree to the terms and conditions');
+            // Validate form data client-side first
+            if (!validateStep1()) {
                 setIsLoading(false);
                 return;
             }
 
-            // Simulate API call - Replace with actual registration logic
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Create user object with selected role
-            const user = {
-                id: `user-${Date.now()}`,
-                name: formData.fullName,
+            // Prepare registration data
+            const [firstName, lastName] = formData.fullName.split(' ', 2);
+            const registrationData = {
+                firstName: firstName || formData.fullName,
+                lastName: lastName || '',
                 email: formData.email,
-                role: formData.role, // Use selected role
-                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.fullName)}&background=random`
+                password: formData.password,
+                role: formData.role
             };
 
-            // Call login from AuthContext (in a real app, you'd register first then login)
-            login(user);
-
-            // Redirect based on selected role
-            const redirectPath = `/${formData.role}/dashboard`;
-            navigate(redirectPath, { replace: true });
+            // Call register from AuthContext
+            await register(registrationData);
             
-        } catch (err) {
-            setError('Registration failed. Please try again.');
+            // Navigation will be handled by the AuthContext useEffect
+            
+        } catch (err: any) {
+            let errorMessage = 'Registration failed. Please try again.';
+            
+            // Handle specific error types
+            if (err.message.includes('User with this email already exists')) {
+                errorMessage = 'An account with this email already exists. Please use a different email or try logging in.';
+            } else if (err.message.includes('validation failed') || err.message.includes('Validation failed')) {
+                errorMessage = 'Please check your information and make sure all requirements are met.';
+            } else if (err.message.includes('Password must')) {
+                errorMessage = err.message;
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+            
+            setError(errorMessage);
             console.error('Registration error:', err);
         } finally {
             setIsLoading(false);
@@ -126,17 +142,29 @@ const RegisterPage: React.FC = () => {
 
     const getPasswordStrength = (password: string) => {
         if (password.length === 0) return '';
-        if (password.length < 4) return 'Weak';
-        if (password.length < 8) return 'Medium';
-        return 'Strong';
+        
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[@$!%*?&]/.test(password)) score++;
+        
+        if (score < 2) return 'Very Weak';
+        if (score < 3) return 'Weak';
+        if (score < 4) return 'Medium';
+        if (score < 5) return 'Strong';
+        return 'Very Strong';
     };
 
     const getPasswordStrengthColor = (password: string) => {
         const strength = getPasswordStrength(password);
         switch (strength) {
+            case 'Very Weak': return 'bg-red-500';
             case 'Weak': return 'bg-red-400';
             case 'Medium': return 'bg-yellow-400';
             case 'Strong': return 'bg-green-400';
+            case 'Very Strong': return 'bg-green-500';
             default: return 'bg-gray-300';
         }
     };
@@ -166,7 +194,27 @@ const RegisterPage: React.FC = () => {
                         {/* Error Message */}
                         {error && (
                             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-6">
-                                {error}
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        {error}
+                                        {error.includes('email already exists') && (
+                                            <div className="mt-2">
+                                                <Link 
+                                                    to="/login" 
+                                                    className="text-purple-600 hover:text-purple-700 font-medium underline"
+                                                >
+                                                    Go to Login Page
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => setError('')}
+                                        className="text-red-400 hover:text-red-600 ml-2"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -284,6 +332,7 @@ const RegisterPage: React.FC = () => {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                                     placeholder="Create a strong password"
                                     disabled={isLoading}
+                                    autoComplete="new-password"
                                     required
                                 />
                                 {/* Password Strength Indicator */}
@@ -295,12 +344,34 @@ const RegisterPage: React.FC = () => {
                                                     className={`h-1 rounded-full transition-all duration-300 ${getPasswordStrengthColor(formData.password)}`}
                                                     style={{ 
                                                         width: formData.password.length === 0 ? '0%' : 
-                                                               formData.password.length < 4 ? '33%' : 
-                                                               formData.password.length < 8 ? '66%' : '100%' 
+                                                               getPasswordStrength(formData.password) === 'Very Weak' ? '20%' :
+                                                               getPasswordStrength(formData.password) === 'Weak' ? '40%' : 
+                                                               getPasswordStrength(formData.password) === 'Medium' ? '60%' : 
+                                                               getPasswordStrength(formData.password) === 'Strong' ? '80%' : '100%' 
                                                     }}
                                                 ></div>
                                             </div>
                                             <span className="text-xs text-gray-500">{getPasswordStrength(formData.password)}</span>
+                                        </div>
+                                        <div className="mt-1 text-xs text-gray-500">
+                                            <p>Password must contain:</p>
+                                            <ul className="list-disc list-inside ml-2 space-y-0.5">
+                                                <li className={/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                                                    At least one lowercase letter
+                                                </li>
+                                                <li className={/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                                                    At least one uppercase letter
+                                                </li>
+                                                <li className={/\d/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                                                    At least one number
+                                                </li>
+                                                <li className={/[@$!%*?&]/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>
+                                                    At least one special character (@$!%*?&)
+                                                </li>
+                                                <li className={formData.password.length >= 8 ? 'text-green-600' : 'text-gray-400'}>
+                                                    At least 8 characters
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 )}
@@ -320,6 +391,7 @@ const RegisterPage: React.FC = () => {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                                     placeholder="Confirm your password"
                                     disabled={isLoading}
+                                    autoComplete="new-password"
                                     required
                                 />
                             </div>

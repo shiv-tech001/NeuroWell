@@ -18,6 +18,8 @@ import AdminDashboard from './src/pages/admin/AdminDashboard';
 import UsersPage from './src/pages/admin/UsersPage';
 import LoginPage from './src/pages/auth/LoginPage';
 import RegisterPage from './src/pages/auth/RegisterPage';
+import ForgotPassword from './src/pages/auth/ForgotPassword';
+import ResetPassword from './src/pages/auth/ResetPassword';
 import Logout from './src/components/auth/Logout';
 import CommunityPage from './src/pages/student/CommunityPage';
 import Profile from './src/pages/student/Profile';
@@ -84,6 +86,8 @@ const App: React.FC = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/contact" element={<ContactPage />} />
             

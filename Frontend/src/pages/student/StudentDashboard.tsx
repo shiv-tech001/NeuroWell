@@ -16,20 +16,63 @@ import {
   Check, Clock, Star, Sparkles, Brain, Gem, Target,
   Send, Bot, Headphones, UserPlus, Mail, Edit3
 } from "lucide-react";
+import { useAuth } from '../../contexts/AuthContext';
+import { moodService, MoodEntry, MoodTrendData } from '../../services/moodService';
+
+// Add custom styles for enhanced animations
+const chartAnimationStyles = `
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+  }
+  
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4); }
+    100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  
+  .animate-float { animation: float 3s ease-in-out infinite; }
+  .animate-shimmer { 
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 2s infinite;
+  }
+  .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+  .animate-fade-in { animation: fade-in 0.6s ease-out; }
+  .animate-slide-in { animation: slideIn 0.3s ease-out; }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = chartAnimationStyles;
+  document.head.appendChild(styleSheet);
+}
 
 
-// Dummy Data
-const moodData = [
-  { day: "MON", mood: 4, intensity: 6 },
-  { day: "TUE", mood: 5, intensity: 7 },
-  { day: "WED", mood: 3, intensity: 5 },
-  { day: "THU", mood: 6, intensity: 8 },
-  { day: "FRI", mood: 7, intensity: 9 },
-  { day: "SAT", mood: 5, intensity: 6 },
-  { day: "SUN", mood: 8, intensity: 9 }
-];
-
-
+// Dummy Data for other components (keeping non-mood related data)
 const achievementsData = [
   { title: "7-Day Streak", icon: "🔥", progress: 70 },
   { title: "Mindfulness Master", icon: "🧘", progress: 50 },
@@ -85,40 +128,7 @@ const availableBadges = [
 ];
 
 
-const mockMoodEntries = [
-  {
-    id: 1,
-    date: "2025-09-14",
-    mood: "Great",
-    emoji: "😁",
-    intensity: 8,
-    notes: "Had a productive day and completed all my assignments!"
-  },
-  {
-    id: 2,
-    date: "2025-09-13",
-    mood: "Good",
-    emoji: "😀",
-    intensity: 6,
-    notes: "Felt energetic after morning exercise."
-  },
-  {
-    id: 3,
-    date: "2025-09-12",
-    mood: "Okay",
-    emoji: "🙂",
-    intensity: 5,
-    notes: "Average day, nothing special."
-  },
-  {
-    id: 4,
-    date: "2025-09-11",
-    mood: "Bad",
-    emoji: "😔",
-    intensity: 3,
-    notes: "Struggled with anxiety before the exam."
-  }
-];
+const mockMoodEntries: MoodEntry[] = [];
 
 
 const chatbotResponses = {
@@ -157,84 +167,138 @@ const Reminders: React.FC<RemindersProps> = ({
   addReminder,
   toggleReminder,
   deleteReminder
-}) => (
-  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md">
-    <h2 className="text-xl font-semibold text-gray-700 mb-6 flex items-center">
-      <Clock className="w-6 h-6 mr-2 text-blue-500" />
-      Reminders
-    </h2>
-    {/* Add New Reminder */}
-    <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 mb-6">
-      <input
-        type="time"
-        value={newReminder.time}
-        onChange={(e) => setNewReminder({ ...newReminder, time: e.target.value })}
-        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <input
-        type="text"
-        placeholder="Activity (e.g., Take a walk)"
-        value={newReminder.activity}
-        onChange={(e) => setNewReminder({ ...newReminder, activity: e.target.value })}
-        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button
-        onClick={addReminder}
-        className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all shadow-md"
-      >
-        Add
-      </button>
-    </div>
-    {/* Reminders List */}
-    <div className="space-y-3 max-h-80 overflow-y-auto">
-      {reminders.length === 0 ? (
-        <p className="text-gray-400 text-center py-6">No reminders yet. Add one above!</p>
-      ) : (
-        reminders.map((reminder) => (
-          <div
-            key={reminder.id}
-            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                checked={reminder.completed}
-                onChange={() => toggleReminder(reminder.id)}
-                className="w-5 h-5 text-blue-500 accent-blue-500 rounded focus:ring-2 focus:ring-blue-300"
-              />
-              <div className={reminder.completed ? "line-through text-gray-400" : "text-gray-700"}>
-                <div className="font-medium">{reminder.activity}</div>
-                <div className="text-sm text-gray-500">{reminder.time}</div>
+}) => {
+  const now = new Date();
+  const currentTime = now.toTimeString().slice(0, 5);
+  
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md">
+      <h2 className="text-xl font-semibold text-gray-700 mb-6 flex items-center">
+        <Clock className="w-6 h-6 mr-2 text-blue-500" />
+        Reminders
+        {reminders.filter(r => !r.completed).length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+            {reminders.filter(r => !r.completed).length} active
+          </span>
+        )}
+      </h2>
+      {/* Add New Reminder */}
+      <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 mb-6">
+        <input
+          type="time"
+          value={newReminder.time}
+          onChange={(e) => setNewReminder({ ...newReminder, time: e.target.value })}
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          placeholder="Activity (e.g., Take a walk)"
+          value={newReminder.activity}
+          onChange={(e) => setNewReminder({ ...newReminder, activity: e.target.value })}
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={addReminder}
+          className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all shadow-md"
+        >
+          Add
+        </button>
+      </div>
+      {/* Reminders List */}
+      <div className="space-y-3 max-h-80 overflow-y-auto">
+        {reminders.length === 0 ? (
+          <p className="text-gray-400 text-center py-6">No reminders yet. Add one above!</p>
+        ) : (
+          reminders.map((reminder) => {
+            const isUpcoming = reminder.time > currentTime && !reminder.completed;
+            const isPast = reminder.time <= currentTime;
+            
+            return (
+              <div
+                key={reminder.id}
+                className={`flex items-center justify-between p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow ${
+                  reminder.completed 
+                    ? 'bg-gray-50 border-gray-200'
+                    : isUpcoming 
+                    ? 'bg-blue-50 border-blue-200'
+                    : isPast
+                    ? 'bg-yellow-50 border-yellow-200'
+                    : 'bg-gray-50 border-gray-200'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={reminder.completed}
+                    onChange={() => toggleReminder(reminder.id)}
+                    className="w-5 h-5 text-blue-500 accent-blue-500 rounded focus:ring-2 focus:ring-blue-300"
+                  />
+                  <div className={reminder.completed ? "line-through text-gray-400" : "text-gray-700"}>
+                    <div className="flex items-center space-x-2">
+                      <div className="font-medium">{reminder.activity}</div>
+                      {isUpcoming && (
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          Upcoming
+                        </span>
+                      )}
+                      {isPast && !reminder.completed && (
+                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+                          Due
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-500 flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {reminder.time}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => deleteReminder(reminder.id)}
+                  className="p-2 rounded-full hover:bg-red-100 transition-colors"
+                >
+                  <X className="w-5 h-5 text-red-500" />
+                </button>
               </div>
-            </div>
-            <button
-              onClick={() => deleteReminder(reminder.id)}
-              className="p-2 rounded-full hover:bg-red-100 transition-colors"
-            >
-              <X className="w-5 h-5 text-red-500" />
-            </button>
-          </div>
-        ))
-      )}
+            );
+          })
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 
 const StudentDashboard = () => {
+  const { user, loading } = useAuth(); // Get user data from context
   const [selectedMood, setSelectedMood] = useState("Okay");
-  const [intensity, setIntensity] = useState(50);
+  const [intensity, setIntensity] = useState(5);
   const [notes, setNotes] = useState("");
   const [sosModalOpen, setSosModalOpen] = useState(false);
   const [dailyTip, setDailyTip] = useState(dailyTips[0]);
   const [habits, setHabits] = useState(defaultHabits);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [newReminder, setNewReminder] = useState({ time: "", activity: "" });
-  const [moodEntries, setMoodEntries] = useState(mockMoodEntries);
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
+  const [moodTrendData, setMoodTrendData] = useState<MoodTrendData[]>([]);
+  const [loadingMood, setLoadingMood] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { id: 1, text: "Hello! I am your wellness assistant. How can I help you today?", sender: "bot", timestamp: new Date() }
   ]);
   const [chatInput, setChatInput] = useState("");
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  // Show loading state while user data is being fetched
+  if (loading) {
+    return (
+      <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
 
   const moods = [
@@ -255,7 +319,135 @@ const StudentDashboard = () => {
       setDailyTip(dailyTips[randomIndex]);
       localStorage.setItem('lastTipDate', today);
     }
+
+    // Load mood data when component mounts
+    loadMoodData();
+
+    // Check for reminder notifications every minute
+    const reminderInterval = setInterval(checkReminders, 60000);
+    
+    return () => clearInterval(reminderInterval);
   }, []);
+
+  // Check reminders every minute
+  useEffect(() => {
+    const reminderInterval = setInterval(checkReminders, 60000);
+    return () => clearInterval(reminderInterval);
+  }, [reminders]);
+
+  // Function to check if any reminders should trigger
+  const checkReminders = () => {
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+    const currentMinute = now.getMinutes();
+    const currentHour = now.getHours();
+    
+    console.log(`⏰ Current time: ${currentTime} - Checking reminders...`);
+    
+    reminders.forEach(reminder => {
+      // Only check active (not completed) reminders
+      if (!reminder.completed && reminder.time === currentTime) {
+        // Check if we haven't already shown notification for this exact minute
+        const reminderKey = `${reminder.id}-${currentHour}-${currentMinute}`;
+        const lastShown = localStorage.getItem(`lastNotification-${reminderKey}`);
+        const today = new Date().toDateString();
+        
+        // Only show if we haven't shown this reminder today at this exact time
+        if (lastShown !== today) {
+          console.log(`🔔 REMINDER TRIGGERED! ${reminder.activity} at ${reminder.time}`);
+          showReminderNotification(reminder);
+          
+          // Mark this reminder as shown for today at this time
+          localStorage.setItem(`lastNotification-${reminderKey}`, today);
+        } else {
+          console.log(`⏭️ Reminder already shown today: ${reminder.activity}`);
+        }
+      }
+    });
+    
+    // Special log for your 22:26 reminder
+    const paaniReminder = reminders.find(r => r.time === '22:26' && r.activity.toLowerCase().includes('paani'));
+    if (paaniReminder && currentTime === '22:26') {
+      console.log('💧 PAANI REMINDER TIME REACHED! Notification should show now.');
+    }
+  };
+
+  // Show reminder notification
+  const showReminderNotification = (reminder: Reminder) => {
+    const message = `⏰ Reminder: ${reminder.activity}`;
+    
+    console.log(`Showing notification: ${message}`);
+    
+    // Add to notifications state (only if not already present)
+    setNotifications(prev => {
+      // Check if this exact message is already showing
+      if (prev.includes(message)) {
+        return prev;
+      }
+      return [...prev, message];
+    });
+    
+    // Show browser notification if permission granted
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("🔔 Wellness Reminder", {
+        body: `${reminder.time} - ${reminder.activity}`,
+        icon: "/favicon.ico",
+        tag: `reminder-${reminder.id}-${reminder.time}`,
+        requireInteraction: true // Keep notification visible until user interacts
+      });
+    }
+    
+    // Auto-remove notification after 8 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(notif => notif !== message));
+    }, 8000);
+  };
+
+  // Request notification permission
+  const requestNotificationPermission = async () => {
+    if ("Notification" in window && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+  };
+
+  // Load mood entries and trend data from API
+  const loadMoodData = async () => {
+    try {
+      setLoadingMood(true);
+      console.log('Loading mood data from database...');
+      
+      // Load recent mood entries for journal
+      const entries = await moodService.getMoodEntries(10);
+      console.log('Loaded mood entries:', entries);
+      setMoodEntries(entries);
+      
+      // Load mood trend for the week (day-wise data)
+      const trendData = await moodService.getMoodTrend(7);
+      console.log('Loaded mood trend data:', trendData);
+      setMoodTrendData(trendData);
+      
+      // Log chart data for debugging
+      if (trendData.length > 0) {
+        console.log('Chart will display:', trendData.map(d => ({
+          day: d.day,
+          mood: d.mood,
+          intensity: d.intensity,
+          hasEntry: d.hasEntry,
+          date: d.date
+        })));
+      } else {
+        console.log('No mood data found - chart will show empty state');
+      }
+      
+    } catch (error) {
+      console.error('Error loading mood data:', error);
+      // Keep empty arrays instead of mock data as per user requirement
+      setMoodEntries([]);
+      setMoodTrendData([]);
+    } finally {
+      setLoadingMood(false);
+    }
+  };
 
 
   const getMoodEmoji = (moodLabel: string) => {
@@ -264,17 +456,35 @@ const StudentDashboard = () => {
   };
 
 
-  const saveCheckin = () => {
-    const newEntry = {
-      id: moodEntries.length + 1,
-      date: new Date().toISOString().split('T')[0],
-      mood: selectedMood,
-      emoji: getMoodEmoji(selectedMood),
-      intensity: parseInt(intensity.toString(), 10),
-      notes: notes
-    };
-    setMoodEntries([newEntry, ...moodEntries]);
-    alert("Mood check-in saved!");
+  const saveCheckin = async () => {
+    try {
+      setLoadingMood(true);
+      
+      // Save mood entry to database
+      const newEntry = await moodService.createMoodEntry({
+        mood: selectedMood,
+        intensity: intensity, // Already 1-10 scale
+        notes: notes.trim() || undefined
+      });
+      
+      // Add to local state
+      setMoodEntries([newEntry, ...moodEntries]);
+      
+      // Reload trend data to get updated chart
+      const trendData = await moodService.getMoodTrend(7);
+      setMoodTrendData(trendData);
+      
+      // Reset form
+      setNotes("");
+      
+      alert("Mood check-in saved successfully!");
+      
+    } catch (error) {
+      console.error('Error saving mood check-in:', error);
+      alert(`Failed to save mood check-in: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoadingMood(false);
+    }
   };
 
 
@@ -293,7 +503,7 @@ const StudentDashboard = () => {
   };
 
 
-  const addReminder = () => {
+  const addReminder = async () => {
     if (newReminder.time && newReminder.activity) {
       const reminder: Reminder = {
         id: Date.now(),
@@ -303,6 +513,16 @@ const StudentDashboard = () => {
       };
       setReminders([...reminders, reminder]);
       setNewReminder({ time: "", activity: "" });
+      
+      // Request notification permission when first reminder is added
+      await requestNotificationPermission();
+      
+      // Show success message
+      const successMessage = `✅ Reminder set for ${newReminder.time}: ${newReminder.activity}`;
+      setNotifications(prev => [...prev, successMessage]);
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(notif => notif !== successMessage));
+      }, 3000);
     }
   };
 
@@ -478,14 +698,22 @@ const StudentDashboard = () => {
   const ProfileCard = () => {
     const moodEmoji = getMoodEmoji(selectedMood);
 
-
     return (
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center space-y-3">
         <div className="w-24 h-24 rounded-full flex items-center justify-center text-6xl bg-gray-100 border-4 border-purple-200 shadow-md">
-          {moodEmoji}
+          {user?.avatar?.url ? (
+            <img 
+              src={user.avatar.url} 
+              alt={user.fullName} 
+              className="w-full h-full rounded-full object-cover"
+            />
+          ) : (
+            <span>{moodEmoji}</span>
+          )}
         </div>
-        <h3 className="text-xl font-bold text-gray-800">Sarah Johnson</h3>
-        <p className="text-sm text-gray-500">Joined: Jan 2025</p>
+        <h3 className="text-xl font-bold text-gray-800">{user?.fullName || 'Student'}</h3>
+        <p className="text-sm text-gray-500">Joined: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Recently'}</p>
+        <p className="text-sm text-gray-600">Role: {user?.role || 'Student'}</p>
         <div className="flex items-center space-x-2">
           <Zap className="w-5 h-5 text-purple-500" />
           <span className="font-semibold text-gray-700">12-Day Streak</span>
@@ -503,34 +731,42 @@ const StudentDashboard = () => {
         Mood Journal Timeline
       </h2>
       <div className="space-y-4 max-h-80 overflow-y-auto">
-        {moodEntries.map((entry) => (
-          <div key={entry.id} className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div className="flex-shrink-0">
-              <span className="text-2xl">{entry.emoji}</span>
-            </div>
-            <div className="flex-grow">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-gray-800">{entry.mood}</span>
-                <span className="text-sm text-gray-500">{entry.date}</span>
-              </div>
-              <div className="mb-2">
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="text-xs text-gray-600">Intensity:</span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${entry.intensity * 10}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-600">{entry.intensity}/10</span>
-                </div>
-              </div>
-              {entry.notes && (
-                <p className="text-sm text-gray-600 italic">"{entry.notes}"</p>
-              )}
-            </div>
+        {moodEntries.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            {loadingMood ? "Loading mood entries..." : "No mood entries yet. Start tracking your mood!"}
           </div>
-        ))}
+        ) : (
+          moodEntries.map((entry, index) => (
+            <div key={entry._id || `entry-${index}`} className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex-shrink-0">
+                <span className="text-2xl">{moodService.getMoodEmoji(entry.mood)}</span>
+              </div>
+              <div className="flex-grow">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-800">{String(entry.mood)}</span>
+                  <span className="text-sm text-gray-500">
+                    {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : 'Today'}
+                  </span>
+                </div>
+                <div className="mb-2">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-xs text-gray-600">Intensity:</span>
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${Math.min(Number(entry.intensity) * 10, 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-gray-600">{entry.intensity}/10</span>
+                  </div>
+                </div>
+                {entry.notes && (
+                  <p className="text-sm text-gray-600 italic">"{String(entry.notes)}"</p>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -692,6 +928,28 @@ const StudentDashboard = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-8 font-sans">
+      {/* Notification Messages */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {notifications.map((notification, index) => (
+          <div
+            key={index}
+            className="bg-white border-l-4 border-blue-500 p-4 rounded-lg shadow-lg animate-slide-in max-w-sm"
+            style={{
+              animation: 'slideIn 0.3s ease-out, fadeOut 0.3s ease-in 4.7s'
+            }}
+          >
+            <div className="flex items-center">
+              <div className="text-blue-500 mr-3">
+                <Bell className="w-5 h-5" />
+              </div>
+              <div className="text-sm text-gray-800 font-medium">
+                {notification}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <button
         onClick={() => setSosModalOpen(true)}
         className="fixed bottom-6 left-6 z-50 w-16 h-16 bg-red-500 text-white rounded-full shadow-lg flex items-center justify-center text-xs font-bold transition-all hover:bg-red-600 animate-pulse"
@@ -708,24 +966,29 @@ const StudentDashboard = () => {
           {/* Left: Welcome Text */}
           <div>
             <p className="text-sm text-gray-500">Good Morning,</p>
-            <h1 className="text-2xl font-bold text-gray-800">Sarah! 🌟</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{user?.firstName || 'Student'}! 🌟</h1>
           </div>
-
 
           {/* Right: Profile and Status */}
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <img
-                src="https://picsum.photos/id/237/200"
-                alt="Profile"
-                className="w-12 h-12 rounded-full object-cover"
-              />
+              {user?.avatar?.url ? (
+                <img
+                  src={user.avatar.url}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+                  {user?.firstName?.[0] || 'S'}
+                </div>
+              )}
               {/* Small online status dot */}
               <span className="absolute bottom-0 right-0 block w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
             </div>
             <div className="hidden sm:flex flex-col">
-              <span className="text-gray-700 font-medium">Sarah</span>
-              <span className="text-xs text-gray-400">Premium Member</span>
+              <span className="text-gray-700 font-medium">{user?.firstName || 'Student'}</span>
+              <span className="text-xs text-gray-400">{user?.role || 'Student'}</span>
             </div>
           </div>
         </div>
@@ -762,15 +1025,16 @@ const StudentDashboard = () => {
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">How intense is this feeling?</h2>
                 <input
                   type="range"
-                  min="0"
-                  max="100"
+                  min="1"
+                  max="10"
                   value={intensity}
                   onChange={(e) => setIntensity(parseInt(e.target.value, 10))}
                   className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-2">
-                  <span>Not intense</span>
-                  <span>Very intense</span>
+                  <span>Low (1)</span>
+                  <span className="font-medium text-blue-600">{intensity}/10</span>
+                  <span>High (10)</span>
                 </div>
               </div>
 
@@ -787,45 +1051,238 @@ const StudentDashboard = () => {
               </div>
 
 
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4">Mood trend this week</h2>
-                <div className="flex items-center mb-4">
-                  <span className="text-4xl mr-4">{getMoodEmoji(selectedMood)}</span>
-                  <div>
-                    <div className="text-2xl font-bold text-gray-800">{selectedMood}</div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      Average
-                      <span className="text-green-500 ml-2 font-medium flex items-center">
-                        <span className="w-2 h-2 inline-block bg-green-500 rounded-full mr-1"></span>
-                        Last 7 Days
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border border-gray-200 shadow-lg">
+                <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mr-3">
+                    <div className="w-4 h-4 bg-white rounded-sm opacity-80"></div>
+                  </div>
+                  Mood trend this week
+                </h2>
+                <div className="flex items-center mb-6">
+                  <div className="relative">
+                    <span className="text-5xl animate-pulse">{getMoodEmoji(selectedMood)}</span>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-bounce"></div>
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      {selectedMood}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      {loadingMood ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+                          Loading trend...
+                        </div>
+                      ) : (
+                        "Weekly Mood Trends"
+                      )}
+                      <span className="text-green-500 ml-3 font-medium flex items-center animate-pulse">
+                        <span className="w-2 h-2 inline-block bg-green-500 rounded-full mr-2 animate-ping"></span>
+                        {moodTrendData.length > 0 ? `${moodTrendData.filter(d => d.hasEntry).length} entries` : 'No data'}
                       </span>
                     </div>
                   </div>
                 </div>
-                <ResponsiveContainer width="100%" height={150}>
-                  <AreaChart data={moodData}>
-                    <defs>
-                      <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} />
-                    <YAxis hide={true} domain={[0, 10]} />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="mood" stroke="#8884d8" fillOpacity={1} fill="url(#colorMood)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {loadingMood ? (
+                  <div className="h-[250px] flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gradient-to-r from-purple-500 to-blue-500 mx-auto mb-4"></div>
+                      <div className="text-gray-500 animate-pulse">Loading beautiful chart...</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 rounded-xl -z-10"></div>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <AreaChart 
+                        data={moodTrendData.length > 0 ? moodTrendData : [
+                          { day: "MON", mood: 0, intensity: 0, hasEntry: false },
+                          { day: "TUE", mood: 0, intensity: 0, hasEntry: false },
+                          { day: "WED", mood: 0, intensity: 0, hasEntry: false },
+                          { day: "THU", mood: 0, intensity: 0, hasEntry: false },
+                          { day: "FRI", mood: 0, intensity: 0, hasEntry: false },
+                          { day: "SAT", mood: 0, intensity: 0, hasEntry: false },
+                          { day: "SUN", mood: 0, intensity: 0, hasEntry: false }
+                        ]} 
+                        margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+                      >
+                        <defs>
+                          <linearGradient id="colorMoodAdvanced" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.9} />
+                            <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.7} />
+                            <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.3} />
+                          </linearGradient>
+                          <linearGradient id="colorIntensityAdvanced" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
+                            <stop offset="50%" stopColor="#f97316" stopOpacity={0.6} />
+                            <stop offset="100%" stopColor="#ef4444" stopOpacity={0.2} />
+                          </linearGradient>
+                          <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge> 
+                              <feMergeNode in="coloredBlur"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+                          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feDropShadow dx="2" dy="4" stdDeviation="3" floodOpacity="0.3"/>
+                          </filter>
+                        </defs>
+                        <CartesianGrid 
+                          strokeDasharray="5 5" 
+                          stroke="#e2e8f0" 
+                          strokeOpacity={0.6}
+                          vertical={false}
+                        />
+                        <XAxis 
+                          dataKey="day" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ 
+                            fontSize: 14, 
+                            fill: '#475569', 
+                            fontWeight: '600',
+                            textAnchor: 'middle'
+                          }}
+                          height={60}
+                          interval={0}
+                          className="animate-fade-in"
+                        />
+                        <YAxis 
+                          domain={[0, 10]} 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ 
+                            fontSize: 12, 
+                            fill: '#64748b',
+                            fontWeight: '500'
+                          }}
+                          label={{ 
+                            value: 'Level (1-10)', 
+                            angle: -90, 
+                            position: 'insideLeft', 
+                            style: { 
+                              textAnchor: 'middle', 
+                              fill: '#64748b', 
+                              fontSize: '13px',
+                              fontWeight: '500'
+                            } 
+                          }}
+                          tickCount={6}
+                          width={60}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                          cursor={{
+                            stroke: '#8b5cf6',
+                            strokeWidth: 2,
+                            strokeDasharray: '5 5',
+                            filter: 'url(#glow)'
+                          }}
+                          formatter={(value, name, props) => {
+                            if (!props.payload.hasEntry) {
+                              return [
+                                <span style={{ color: '#94a3b8' }}>No data</span>, 
+                                <span style={{ color: '#64748b' }}>No entry for this day</span>
+                              ];
+                            }
+                            const color = name === 'mood' ? '#8b5cf6' : '#f59e0b';
+                            return [
+                              <span style={{ color, fontWeight: 'bold' }}>
+                                {value}{name === 'intensity' ? '/10' : '/5'}
+                              </span>,
+                              <span style={{ color: '#64748b' }}>
+                                {name === 'mood' ? `Mood: ${props.payload.moodLabel || 'Unknown'}` : 'Intensity Level'}
+                              </span>
+                            ];
+                          }}
+                          labelFormatter={(label) => (
+                            <span style={{ color: '#1e293b', fontWeight: 'bold' }}>📅 {label}</span>
+                          )}
+                          animationDuration={300}
+                        />
+                        {moodTrendData.length > 0 && (
+                          <>
+                            <Area 
+                              type="monotone"
+                              dataKey="mood" 
+                              stroke="#8b5cf6" 
+                              strokeWidth={4}
+                              fillOpacity={1} 
+                              fill="url(#colorMoodAdvanced)" 
+                              name="mood"
+                              connectNulls={false}
+                              filter="url(#glow)"
+                              animationBegin={0}
+                              animationDuration={2000}
+                              animationEasing="ease-out"
+                            />
+                            <Area 
+                              type="monotone"
+                              dataKey="intensity" 
+                              stroke="#f59e0b" 
+                              strokeWidth={3}
+                              fillOpacity={0.6} 
+                              fill="url(#colorIntensityAdvanced)" 
+                              name="intensity"
+                              connectNulls={false}
+                              filter="url(#shadow)"
+                              animationBegin={500}
+                              animationDuration={2000}
+                              animationEasing="ease-out"
+                            />
+                          </>
+                        )}
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                <div className="mt-6 space-y-3">
+                  <div className="flex justify-center space-x-8">
+                    <div className="flex items-center space-x-3 group">
+                      <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full shadow-lg group-hover:scale-110 transition-transform"></div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors">
+                        Mood Level (1-5)
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-3 group">
+                      <div className="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full shadow-lg group-hover:scale-110 transition-transform"></div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">
+                        Intensity Level (1-10)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-center text-xs text-gray-500 bg-white/50 rounded-lg py-2 px-4">
+                    <span className="inline-flex items-center">
+                      📊 Your mood tracking progress 
+                      <span className="ml-1 font-semibold text-green-600">
+                        {moodTrendData.filter(d => d.hasEntry).length} of 7 days
+                      </span>
+                    </span>
+                  </div>
+                </div>
               </div>
 
 
               <div className="text-center">
                 <button
                   onClick={saveCheckin}
-                  className="bg-blue-500 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:bg-blue-600 transition-colors transform hover:scale-105"
+                  disabled={loadingMood}
+                  className={`font-bold py-4 px-12 rounded-full shadow-lg transition-colors transform hover:scale-105 ${
+                    loadingMood 
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
                 >
-                  Save Check-in
+                  {loadingMood ? 'Saving...' : 'Save Check-in'}
                 </button>
               </div>
             </div>

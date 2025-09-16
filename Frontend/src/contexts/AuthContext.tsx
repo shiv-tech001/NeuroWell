@@ -1,20 +1,29 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService';
 
 type User = {
-  id: string;
-  name: string;
+  _id: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: string; // Made role required
-  avatar?: string;
-  // Add other user properties as needed
+  role: string;
+  avatar?: {
+    url: string;
+  };
+  fullName: string;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
-  login: (userData: User) => void;
-  logout: () => void; // Returns void, navigation is handled in the component
+  login: (email: string, password: string) => Promise<void>;
+  register: (userData: any) => Promise<void>;
+  logout: () => Promise<void>;
   loading: boolean;
 };
 
@@ -25,34 +34,78 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session/token in localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const initializeAuth = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        // Ensure role is always present, default to 'student' if missing
-        if (!parsedUser.role) {
-          parsedUser.role = 'student'; 
+        // Check for existing token and validate it
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          authService.setToken(token);
+          const userData = await authService.getMe();
+          if (userData) {
+            setUser(userData);
+          }
         }
-        setUser(parsedUser);
       } catch (error) {
-        console.error('Failed to parse user data', error);
+        console.error('Auth initialization failed:', error);
+        // Clear invalid auth data
+        localStorage.removeItem('authToken');
         localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  // Handle automatic navigation after login
+  useEffect(() => {
+    if (user && !loading) {
+      const currentPath = window.location.hash.replace('#', '');
+      const isOnAuthPage = currentPath === '/login' || currentPath === '/register';
+      
+      if (isOnAuthPage) {
+        const dashboardPath = `/${user.role}/dashboard`;
+        window.location.hash = dashboardPath;
+      }
+    }
+  }, [user, loading]);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    try {
+      setLoading(true);
+      const userData = await authService.login({ email, password });
+      setUser(userData);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    // We'll handle navigation in the Logout component
-    return true;
+  const register = async (userData: any): Promise<void> => {
+    try {
+      setLoading(true);
+      const newUser = await authService.register(userData);
+      setUser(newUser);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      await authService.logout();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Force logout even if API call fails
+      setUser(null);
+    }
   };
 
   return (
@@ -61,6 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         user,
         isAuthenticated: !!user,
         login,
+        register,
         logout,
         loading
       }}

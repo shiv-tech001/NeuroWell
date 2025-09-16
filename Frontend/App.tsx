@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
@@ -29,8 +28,9 @@ import ContactPage from './src/pages/ContactPage'; // New import
 import NotificationsPage from './src/pages/student/Notification';
 
 // Protected Route Component
-// Protected Route Component
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -62,101 +62,111 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   return <>{children}</>;
 };
 
-
-
 const App: React.FC = () => {
-    return (
-        <AuthProvider>
-          <HashRouter>
-            <Layout>
-              <Routes>
-                  <Route index element={<LandingPage />} />
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/logout" element={<Logout />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  
-                  {/* Student Routes */}
-                  <Route path="/student/dashboard" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <StudentDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/student/appointments" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <BookAppointmentPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/student/resources" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <ResourcesPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/student/community" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <CommunityPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/student/chat" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <ChatPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/student/settings" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <SettingsPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/student/profile" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <Profile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/notifications" element={
-                    <ProtectedRoute allowedRoles={['student']}>
-                      <NotificationsPage />
-                    </ProtectedRoute>
-                  } />
+  return (
+    <AuthProvider>
+      <HashRouter>
+        <ToastContainer 
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <Layout>
+          <Routes>
+            <Route index element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/contact" element={<ContactPage />} />
+            
+            {/* Student Routes */}
+            <Route path="/student/dashboard" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <StudentDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/appointments" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <BookAppointmentPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/resources" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <ResourcesPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/community" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <CommunityPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/chat" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <ChatPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/settings" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <SettingsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/profile" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <NotificationsPage />
+              </ProtectedRoute>
+            } />
 
-                  {/* Public Service Routes */}
-                  <Route path="/services" element={<ServicesPage />} />
-                  <Route path="/services/chatboat" element={<ChatboatPage />} />
-                  <Route path="/services/exercise" element={<ExercisePage />} />
+            {/* Public Service Routes */}
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/services/chatboat" element={<ChatboatPage />} />
+            <Route path="/services/exercise" element={<ExercisePage />} />
 
-                  {/* Counselor Routes */}
-                  <Route path="/counselor/dashboard" element={
-                    <ProtectedRoute allowedRoles={['counselor']}>
-                      <CounselorDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/counselor/patients" element={
-                    <ProtectedRoute allowedRoles={['counselor']}>
-                      <PatientsPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/counselor/appointments" element={
-                    <ProtectedRoute allowedRoles={['counselor']}>
-                      <AppointmentsPage />
-                    </ProtectedRoute>
-                  } />
+            {/* Counselor Routes */}
+            <Route path="/counselor/dashboard" element={
+              <ProtectedRoute allowedRoles={['counselor']}>
+                <CounselorDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/counselor/patients" element={
+              <ProtectedRoute allowedRoles={['counselor']}>
+                <PatientsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/counselor/appointments" element={
+              <ProtectedRoute allowedRoles={['counselor']}>
+                <AppointmentsPage />
+              </ProtectedRoute>
+            } />
 
-                  {/* Admin Routes */}
-                  <Route path="/admin/dashboard" element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/users" element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <UsersPage />
-                    </ProtectedRoute>
-                  } />
-              </Routes>
-            </Layout>
-          </HashRouter>
-        </AuthProvider>
-    );
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <UsersPage />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Layout>
+      </HashRouter>
+    </AuthProvider>
+  );
 };
 
 export default App;

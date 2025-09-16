@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-
 import { LogoIcon } from '@components/icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { 
+  AcademicCapIcon,
+  UserIcon,
+  CheckCircleIcon
+} from '@heroicons/react/24/outline';
 
 const RegisterPage: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -13,6 +17,7 @@ const RegisterPage: React.FC = () => {
         email: '',
         password: '',
         confirmPassword: '',
+        role: 'student' as 'student' | 'counselor', // Added role field
         agreeToTerms: false
     });
     const navigate = useNavigate();
@@ -34,6 +39,16 @@ const RegisterPage: React.FC = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
         // Clear error when user starts typing
+        if (error) setError('');
+    };
+
+    // Handle role selection
+    const handleRoleChange = (role: 'student' | 'counselor') => {
+        setFormData(prev => ({
+            ...prev,
+            role: role
+        }));
+        // Clear error when user changes role
         if (error) setError('');
     };
 
@@ -85,21 +100,21 @@ const RegisterPage: React.FC = () => {
             // Simulate API call - Replace with actual registration logic
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Create user object
+            // Create user object with selected role
             const user = {
                 id: `user-${Date.now()}`,
                 name: formData.fullName,
                 email: formData.email,
-                role: 'student',
+                role: formData.role, // Use selected role
                 avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.fullName)}&background=random`
             };
 
             // Call login from AuthContext (in a real app, you'd register first then login)
             login(user);
 
-            // Redirect to the intended page or dashboard
-            const from = location.state?.from?.pathname || '/student/dashboard';
-            navigate(from, { replace: true });
+            // Redirect based on selected role
+            const redirectPath = `/${formData.role}/dashboard`;
+            navigate(redirectPath, { replace: true });
             
         } catch (err) {
             setError('Registration failed. Please try again.');
@@ -128,8 +143,6 @@ const RegisterPage: React.FC = () => {
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
-            
-
             {/* Main Content */}
             <main className="flex-1 flex items-center justify-center p-8">
                 <div className="w-full max-w-md">
@@ -159,6 +172,68 @@ const RegisterPage: React.FC = () => {
 
                         {/* Form */}
                         <form className="space-y-6" onSubmit={handleSubmit}>
+                            {/* Role Selection */}
+                            <div className="space-y-3">
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    I am registering as a
+                                </label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {/* Student Option */}
+                                    <div
+                                        onClick={() => handleRoleChange('student')}
+                                        className={`
+                                            relative p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md
+                                            ${formData.role === 'student' 
+                                                ? 'border-blue-500 bg-blue-50/50 shadow-md' 
+                                                : 'border-gray-200 bg-white/50 hover:border-blue-300'
+                                            }
+                                        `}
+                                    >
+                                        <div className="flex flex-col items-center text-center space-y-2">
+                                            <div className={`p-3 rounded-lg bg-gradient-to-r ${formData.role === 'student' ? 'from-blue-500 to-cyan-500' : 'from-gray-400 to-gray-500'}`}>
+                                                <AcademicCapIcon className="w-6 h-6 text-white" />
+                                            </div>
+                                            <span className={`text-sm font-medium ${formData.role === 'student' ? 'text-blue-700' : 'text-gray-600'}`}>
+                                                Student
+                                            </span>
+                                            <span className="text-xs text-gray-500">Seeking support & guidance</span>
+                                        </div>
+                                        {formData.role === 'student' && (
+                                            <div className="absolute top-2 right-2">
+                                                <CheckCircleIcon className="w-5 h-5 text-blue-500" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Counselor Option */}
+                                    <div
+                                        onClick={() => handleRoleChange('counselor')}
+                                        className={`
+                                            relative p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md
+                                            ${formData.role === 'counselor' 
+                                                ? 'border-purple-500 bg-purple-50/50 shadow-md' 
+                                                : 'border-gray-200 bg-white/50 hover:border-purple-300'
+                                            }
+                                        `}
+                                    >
+                                        <div className="flex flex-col items-center text-center space-y-2">
+                                            <div className={`p-3 rounded-lg bg-gradient-to-r ${formData.role === 'counselor' ? 'from-purple-500 to-pink-500' : 'from-gray-400 to-gray-500'}`}>
+                                                <UserIcon className="w-6 h-6 text-white" />
+                                            </div>
+                                            <span className={`text-sm font-medium ${formData.role === 'counselor' ? 'text-purple-700' : 'text-gray-600'}`}>
+                                                Counselor
+                                            </span>
+                                            <span className="text-xs text-gray-500">Providing professional help</span>
+                                        </div>
+                                        {formData.role === 'counselor' && (
+                                            <div className="absolute top-2 right-2">
+                                                <CheckCircleIcon className="w-5 h-5 text-purple-500" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Full Name */}
                             <div>
                                 <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -272,7 +347,14 @@ const RegisterPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center justify-center"
+                                className={`
+                                    w-full font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center justify-center
+                                    ${formData.role === 'student' 
+                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white' 
+                                        : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white'
+                                    }
+                                    disabled:opacity-50 disabled:cursor-not-allowed
+                                `}
                             >
                                 {isLoading ? (
                                     <>
@@ -283,7 +365,14 @@ const RegisterPage: React.FC = () => {
                                         Creating Account...
                                     </>
                                 ) : (
-                                    'Next Step'
+                                    <div className="flex items-center gap-2">
+                                        {formData.role === 'student' ? (
+                                            <AcademicCapIcon className="w-5 h-5" />
+                                        ) : (
+                                            <UserIcon className="w-5 h-5" />
+                                        )}
+                                        <span>Register as {formData.role === 'student' ? 'Student' : 'Counselor'}</span>
+                                    </div>
                                 )}
                             </button>
                         </form>
@@ -298,8 +387,6 @@ const RegisterPage: React.FC = () => {
                     </div>
                 </div>
             </main>
-
-            
         </div>
     );
 };

@@ -53,11 +53,9 @@ const Navbar: React.FC = () => {
 
   const studentNavLinks = [
     { to: '/student/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-    { to: '/student/resources', label: 'Resources', icon: <BookText size={18} /> },
     { to: '/student/community', label: 'Community', icon: <Users2 size={18} /> },
-    { to: '/services/services', label: 'Services', icon: <HeartHandshake size={18} /> },
+    { to: '/services', label: 'Resources', icon: <BookText size={18} /> },
     { to: '/contact', label: 'Contact', icon: <Mail size={18} /> },
-
   ];
 
   const counselorNavLinks = [
@@ -71,7 +69,7 @@ const Navbar: React.FC = () => {
     { to: '/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { to: '/admin/users', label: 'Users', icon: <Users2 size={18} /> },
     { to: '/admin/counselors', label: 'Counselors', icon: <GraduationCap size={18} /> },
-    { to: '/services/services', label: 'Services', icon: <HeartHandshake size={18} /> },
+    { to: '/services', label: 'Resources', icon: <BookText size={18} /> },
     { to: '/admin/analytics', label: 'Analytics', icon: <BookText size={18} /> },
     { to: '/contact', label: 'Contact', icon: <Mail size={18} /> },
     { to: '/admin/settings', label: 'Settings', icon: <Settings size={18} /> },
@@ -79,8 +77,7 @@ const Navbar: React.FC = () => {
 
   const landingNavLinks = [
     { to: '/', label: 'Home', icon: <Home size={18} /> },
-    { to: '/services', label: 'Services', icon: <HeartHandshake size={18} /> },
-    { to: '/student/resources', label: 'Resources', icon: <BookText size={18} /> },
+    { to: '/services', label: 'Resources', icon: <BookText size={18} /> },
     { to: '/contact', label: 'Contact', icon: <Mail size={18} /> },
   ];
   

@@ -17,6 +17,7 @@ import {
   Send, Bot, Headphones, UserPlus, Mail, Edit3
 } from "lucide-react";
 
+
 // Dummy Data
 const moodData = [
   { day: "MON", mood: 4, intensity: 6 },
@@ -28,11 +29,13 @@ const moodData = [
   { day: "SUN", mood: 8, intensity: 9 }
 ];
 
+
 const achievementsData = [
   { title: "7-Day Streak", icon: "🔥", progress: 70 },
   { title: "Mindfulness Master", icon: "🧘", progress: 50 },
-  { title: "Stress Fighter", icon: "🛡️", progress: 90 }
+  { title: "Stress Fighter", icon: "🛡", progress: 90 }
 ];
+
 
 const leaderboardData = [
   { rank: 1, name: "You", streak: 12 },
@@ -41,11 +44,13 @@ const leaderboardData = [
   { rank: 4, name: "Emily R.", streak: 8 },
 ];
 
+
 const upcomingEvents = [
   { title: "Therapy Session", time: "2:00 PM", color: "purple" },
   { title: "Mindfulness Group", time: "4:30 PM", color: "blue" },
   { title: "Mood Check-in", time: "8:00 PM", color: "green" },
 ];
+
 
 const dailyTips = [
   { text: "Take a 5-min walk between classes 🌿", icon: <Leaf className="w-5 h-5 text-green-600" /> },
@@ -54,6 +59,7 @@ const dailyTips = [
   { text: "Try stretching to relieve muscle tension.", icon: <Coffee className="w-5 h-5 text-orange-600" /> }
 ];
 
+
 const emergencyContacts = [
   { id: 1, name: "Dr. Emily Carter", role: "Counselor", phone: "555-0123", available: true },
   { id: 2, name: "Mom", role: "Parent", phone: "555-0456", available: true },
@@ -61,11 +67,13 @@ const emergencyContacts = [
   { id: 4, name: "Campus Security", role: "Security", phone: "555-0999", available: true }
 ];
 
+
 const defaultHabits = [
   { id: 1, name: "Drink Water", icon: "💧", target: 8, completed: 5, streak: 3 },
   { id: 2, name: "Meditate", icon: "🧘", target: 1, completed: 1, streak: 7 },
   { id: 3, name: "Sleep on Time", icon: "😴", target: 1, completed: 0, streak: 2 }
 ];
+
 
 const availableBadges = [
   { id: 1, name: "Consistent Check-in", icon: "⭐", earned: true, description: "5 days in a row" },
@@ -73,8 +81,9 @@ const availableBadges = [
   { id: 3, name: "Hydrated", icon: "💧", earned: false, description: "7 days of water goals" },
   { id: 4, name: "Early Bird", icon: "🌅", earned: false, description: "Wake up before 7 AM" },
   { id: 5, name: "Mood Master", icon: "😊", earned: true, description: "Track mood for 30 days" },
-  { id: 6, name: "Stress Buster", icon: "🛡️", earned: false, description: "Complete stress activities" }
+  { id: 6, name: "Stress Buster", icon: "🛡", earned: false, description: "Complete stress activities" }
 ];
+
 
 const mockMoodEntries = [
   {
@@ -111,6 +120,7 @@ const mockMoodEntries = [
   }
 ];
 
+
 const chatbotResponses = {
   "i feel anxious": "Take a deep breath, you are not alone. Try the 4-7-8 breathing technique: inhale for 4, hold for 7, exhale for 8. 🌸",
   "i'm stressed": "I understand. Stress is tough. Consider taking a 5-minute break, step outside if possible, or try a quick meditation. You've got this! 💪",
@@ -120,7 +130,27 @@ const chatbotResponses = {
   "default": "Thank you for sharing. I'm here to listen and support you. Can you tell me more about how you're feeling right now? 🌟"
 };
 
-const Reminders = ({
+
+interface Reminder {
+  id: number;
+  time: string;
+  activity: string;
+  completed: boolean;
+}
+
+
+interface RemindersProps {
+  reminders: Reminder[];
+  newReminder: { time: string; activity: string };
+  setNewReminder: React.Dispatch<React.SetStateAction<{ time: string; activity: string }>>;
+  addReminder: () => void;
+  toggleReminder: (id: number) => void;
+  deleteReminder: (id: number) => void;
+}
+
+
+// UPDATED Reminders Component with Enhanced Design
+const Reminders: React.FC<RemindersProps> = ({
   reminders,
   newReminder,
   setNewReminder,
@@ -128,55 +158,60 @@ const Reminders = ({
   toggleReminder,
   deleteReminder
 }) => (
-  <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-    <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-md">
+    <h2 className="text-xl font-semibold text-gray-700 mb-6 flex items-center">
       <Clock className="w-6 h-6 mr-2 text-blue-500" />
       Reminders
     </h2>
-    <div className="mb-4 space-y-2">
+    {/* Add New Reminder */}
+    <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 mb-6">
       <input
         type="time"
         value={newReminder.time}
-        onChange={(e) => setNewReminder({...newReminder, time: e.target.value})}
-        className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+        onChange={(e) => setNewReminder({ ...newReminder, time: e.target.value })}
+        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <input
         type="text"
         placeholder="Activity (e.g., Take a walk)"
         value={newReminder.activity}
-        onChange={(e) => setNewReminder({...newReminder, activity: e.target.value})}
-        className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+        onChange={(e) => setNewReminder({ ...newReminder, activity: e.target.value })}
+        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
         onClick={addReminder}
-        className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+        className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all shadow-md"
       >
-        Add Reminder
+        Add
       </button>
     </div>
-    <div className="space-y-2">
+    {/* Reminders List */}
+    <div className="space-y-3 max-h-80 overflow-y-auto">
       {reminders.length === 0 ? (
-        <p className="text-gray-500 text-sm text-center py-4">No reminders set</p>
+        <p className="text-gray-400 text-center py-6">No reminders yet. Add one above!</p>
       ) : (
         reminders.map((reminder) => (
-          <div key={reminder.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div
+            key={reminder.id}
+            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+          >
             <div className="flex items-center space-x-3">
               <input
                 type="checkbox"
                 checked={reminder.completed}
                 onChange={() => toggleReminder(reminder.id)}
-                className="w-4 h-4 text-blue-600"
+                className="w-5 h-5 text-blue-500 accent-blue-500 rounded focus:ring-2 focus:ring-blue-300"
               />
-              <div className={reminder.completed ? 'line-through text-gray-500' : ''}>
-                <div className="font-medium text-sm">{reminder.activity}</div>
-                <div className="text-xs text-gray-500">{reminder.time}</div>
+              <div className={reminder.completed ? "line-through text-gray-400" : "text-gray-700"}>
+                <div className="font-medium">{reminder.activity}</div>
+                <div className="text-sm text-gray-500">{reminder.time}</div>
               </div>
             </div>
             <button
               onClick={() => deleteReminder(reminder.id)}
-              className="text-red-500 hover:text-red-700"
+              className="p-2 rounded-full hover:bg-red-100 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5 text-red-500" />
             </button>
           </div>
         ))
@@ -185,6 +220,7 @@ const Reminders = ({
   </div>
 );
 
+
 const StudentDashboard = () => {
   const [selectedMood, setSelectedMood] = useState("Okay");
   const [intensity, setIntensity] = useState(50);
@@ -192,13 +228,14 @@ const StudentDashboard = () => {
   const [sosModalOpen, setSosModalOpen] = useState(false);
   const [dailyTip, setDailyTip] = useState(dailyTips[0]);
   const [habits, setHabits] = useState(defaultHabits);
-  const [reminders, setReminders] = useState([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [newReminder, setNewReminder] = useState({ time: "", activity: "" });
   const [moodEntries, setMoodEntries] = useState(mockMoodEntries);
   const [chatMessages, setChatMessages] = useState([
     { id: 1, text: "Hello! I am your wellness assistant. How can I help you today?", sender: "bot", timestamp: new Date() }
   ]);
   const [chatInput, setChatInput] = useState("");
+
 
   const moods = [
     { emoji: "😞", label: "Awful" },
@@ -207,6 +244,7 @@ const StudentDashboard = () => {
     { emoji: "😀", label: "Good" },
     { emoji: "😁", label: "Great" }
   ];
+
 
   useEffect(() => {
     const today = new Date().toDateString();
@@ -219,10 +257,12 @@ const StudentDashboard = () => {
     }
   }, []);
 
-  const getMoodEmoji = (moodLabel) => {
+
+  const getMoodEmoji = (moodLabel: string) => {
     const mood = moods.find(m => m.label === moodLabel);
     return mood ? mood.emoji : '🙂';
   };
+
 
   const saveCheckin = () => {
     const newEntry = {
@@ -230,14 +270,15 @@ const StudentDashboard = () => {
       date: new Date().toISOString().split('T')[0],
       mood: selectedMood,
       emoji: getMoodEmoji(selectedMood),
-      intensity: parseInt(intensity),
+      intensity: parseInt(intensity.toString(), 10),
       notes: notes
     };
     setMoodEntries([newEntry, ...moodEntries]);
     alert("Mood check-in saved!");
   };
 
-  const toggleHabit = (habitId) => {
+
+  const toggleHabit = (habitId: number) => {
     setHabits(habits.map(habit => {
       if (habit.id === habitId) {
         const newCompleted = habit.completed === habit.target ? 0 : habit.completed + 1;
@@ -251,9 +292,10 @@ const StudentDashboard = () => {
     }));
   };
 
+
   const addReminder = () => {
     if (newReminder.time && newReminder.activity) {
-      const reminder = {
+      const reminder: Reminder = {
         id: Date.now(),
         time: newReminder.time,
         activity: newReminder.activity,
@@ -264,19 +306,23 @@ const StudentDashboard = () => {
     }
   };
 
-  const toggleReminder = (id) => {
+
+  const toggleReminder = (id: number) => {
     setReminders(reminders.map(reminder =>
       reminder.id === id ? { ...reminder, completed: !reminder.completed } : reminder
     ));
   };
 
-  const deleteReminder = (id) => {
+
+  const deleteReminder = (id: number) => {
     setReminders(reminders.filter(reminder => reminder.id !== id));
   };
 
-  const contactEmergency = (contact) => {
+
+  const contactEmergency = (contact: any) => {
     alert(`Contacting ${contact.name} at ${contact.phone}...`);
   };
+
 
   const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -287,27 +333,34 @@ const StudentDashboard = () => {
     }]);
     const [input, setInput] = useState('');
 
+
     const handleSend = () => {
       if (input.trim() === '') return;
 
+
       const userMessage = { id: Date.now(), text: input, sender: "user" };
       setMessages(prevMessages => [...prevMessages, userMessage]);
+
 
       const lowerCaseInput = input.toLowerCase();
       const hardcodedResponse = Object.keys(chatbotResponses).find(key => lowerCaseInput.includes(key));
       const botResponseText = hardcodedResponse ? chatbotResponses[hardcodedResponse] : chatbotResponses.default;
       const botMessage = { id: Date.now() + 1, text: botResponseText, sender: "bot" };
 
+
       setTimeout(() => {
         setMessages(prevMessages => [...prevMessages, botMessage]);
       }, 500);
 
+
       setInput('');
     };
+
 
     const toggleChatbot = () => {
       setIsOpen(!isOpen);
     };
+
 
     return (
       <div className="fixed bottom-6 right-6 z-50">
@@ -333,9 +386,7 @@ const StudentDashboard = () => {
               {messages.map((msg, index) => (
                 <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[70%] p-3 rounded-lg text-sm ${
-                      msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
-                    }`}
+                    className={`max-w-[70%] p-3 rounded-lg text-sm ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'}`}
                   >
                     {msg.text}
                   </div>
@@ -365,6 +416,7 @@ const StudentDashboard = () => {
     );
   };
 
+
   
   const DailyTip = () => (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-4">
@@ -374,6 +426,7 @@ const StudentDashboard = () => {
       <p className="text-gray-700 font-medium">{dailyTip.text}</p>
     </div>
   );
+
 
   const SmartCalendar = () => (
     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -392,6 +445,7 @@ const StudentDashboard = () => {
       </div>
     </div>
   );
+
 
   const Leaderboard = () => (
     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -419,9 +473,11 @@ const StudentDashboard = () => {
     </div>
   );
 
+
   // --- UPDATED ProfileCard Component ---
   const ProfileCard = () => {
     const moodEmoji = getMoodEmoji(selectedMood);
+
 
     return (
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center space-y-3">
@@ -438,6 +494,7 @@ const StudentDashboard = () => {
       </div>
     );
   };
+
 
   const MoodJournal = () => (
     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -477,6 +534,7 @@ const StudentDashboard = () => {
       </div>
     </div>
   );
+
 
   const HabitTracker = () => (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -523,6 +581,7 @@ const StudentDashboard = () => {
     </div>
   );
 
+
   const Badges = () => (
     <div className="mt-6">
       <h4 className="text-lg font-bold text-gray-800 mb-3">Earned Badges</h4>
@@ -541,7 +600,8 @@ const StudentDashboard = () => {
     </div>
   );
 
-  const SOSModal = ({ isOpen, onClose }) => {
+
+  const SOSModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
     if (!isOpen) return null;
     
     return (
@@ -598,6 +658,7 @@ const StudentDashboard = () => {
               <ChevronRight className="w-6 h-6" />
             </button>
 
+
             <div className="p-4 bg-gray-100 rounded-xl space-y-2">
               <h4 className="font-semibold text-gray-700">Message a Contact</h4>
               {emergencyContacts.map((contact) => (
@@ -605,7 +666,7 @@ const StudentDashboard = () => {
                   key={contact.id}
                   onClick={() => contactEmergency(contact)}
                   disabled={!contact.available}
-                  className={`w-full text-left py-2 px-4 rounded-lg bg-white hover:bg-gray-200 transition-colors flex items-center justify-between ${!contact.available && 'opacity-50 cursor-not-allowed'}`}
+                  className={`w-full text-left py-2 px-4 rounded-lg bg-white hover:bg-gray-200 transition-colors flex items-center justify-between ${!contact.available ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span>{contact.name}</span>
                   <ChevronRight className="w-4 h-4 text-gray-500" />
@@ -613,6 +674,7 @@ const StudentDashboard = () => {
               ))}
             </div>
           </div>
+
 
           <div className="text-center">
             <button 
@@ -627,27 +689,48 @@ const StudentDashboard = () => {
     );
   };
 
+
   return (
     <div className="bg-gray-100 min-h-screen p-8 font-sans">
       <button
         onClick={() => setSosModalOpen(true)}
-        className="fixed top-6 right-6 z-50 w-16 h-16 bg-red-500 text-white rounded-full shadow-lg flex items-center justify-center text-xs font-bold transition-all hover:bg-red-600 animate-pulse"
+        className="fixed bottom-6 left-6 z-50 w-16 h-16 bg-red-500 text-white rounded-full shadow-lg flex items-center justify-center text-xs font-bold transition-all hover:bg-red-600 animate-pulse"
       >
+
         SOS
       </button>
       {sosModalOpen && <SOSModal isOpen={sosModalOpen} onClose={() => setSosModalOpen(false)} />}
       <Chatbot />
 
+
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl font-bold text-gray-800">NeuroWell</span>
+        <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-md">
+          {/* Left: Welcome Text */}
+          <div>
+            <p className="text-sm text-gray-500">Good Morning,</p>
+            <h1 className="text-2xl font-bold text-gray-800">Sarah! 🌟</h1>
           </div>
+
+
+          {/* Right: Profile and Status */}
           <div className="flex items-center space-x-4">
-            <span className="text-gray-700">Welcome, Sarah! 🌟</span>
-            <img src="https://picsum.photos/200" alt="Profile" className="w-10 h-10 rounded-full" />
+            <div className="relative">
+              <img
+                src="https://picsum.photos/id/237/200"
+                alt="Profile"
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              {/* Small online status dot */}
+              <span className="absolute bottom-0 right-0 block w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+            </div>
+            <div className="hidden sm:flex flex-col">
+              <span className="text-gray-700 font-medium">Sarah</span>
+              <span className="text-xs text-gray-400">Premium Member</span>
+            </div>
           </div>
         </div>
+
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-8">
@@ -674,6 +757,7 @@ const StudentDashboard = () => {
                 </div>
               </div>
 
+
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">How intense is this feeling?</h2>
                 <input
@@ -681,7 +765,7 @@ const StudentDashboard = () => {
                   min="0"
                   max="100"
                   value={intensity}
-                  onChange={(e) => setIntensity(e.target.value)}
+                  onChange={(e) => setIntensity(parseInt(e.target.value, 10))}
                   className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-2">
@@ -690,6 +774,7 @@ const StudentDashboard = () => {
                 </div>
               </div>
 
+
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">Notes</h2>
                 <textarea
@@ -697,9 +782,10 @@ const StudentDashboard = () => {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Write your thoughts here. What's on your mind?"
                   className="w-full p-4 rounded-lg bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm text-gray-700 placeholder-gray-400"
-                  rows="4"
+                  rows={4}
                 />
               </div>
+
 
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">Mood trend this week</h2>
@@ -733,6 +819,7 @@ const StudentDashboard = () => {
                 </ResponsiveContainer>
               </div>
 
+
               <div className="text-center">
                 <button
                   onClick={saveCheckin}
@@ -745,6 +832,7 @@ const StudentDashboard = () => {
             
             <MoodJournal />
           </div>
+
 
           <div className="space-y-8">
             <ProfileCard />
@@ -766,5 +854,6 @@ const StudentDashboard = () => {
     </div>
   );
 };
+
 
 export default StudentDashboard;

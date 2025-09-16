@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import Logo from '../../public/Logo.jpg';
+// Using public URL for the logo
+
 // Lucide Icons (install: npm install lucide-react)
 import { 
   LayoutDashboard, 
@@ -27,6 +28,7 @@ import {
 const Navbar: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -91,19 +93,25 @@ const Navbar: React.FC = () => {
         { to: '/register', label: 'Register', icon: <UserPlus size={18} /> },
       ];
 
-  let currentNavLinks: { to: string; label: string; icon: JSX.Element }[] = [];
+  let currentNavLinks: { to: string; label: string; icon: React.ReactElement }[] = [];
   let profilePath = '/profile';
 
   if (isAuthenticated && user) {
-    if (user.role === 'student') {
-      currentNavLinks = studentNavLinks;
-      profilePath = '/student/profile';
-    } else if (user.role === 'counselor') {
-      currentNavLinks = counselorNavLinks;
-      profilePath = '/counselor/profile';
-    } else if (user.role === 'admin') {
-      currentNavLinks = adminNavLinks;
-      profilePath = '/admin/profile';
+    switch(user.role) {
+      case 'student':
+        currentNavLinks = studentNavLinks;
+        profilePath = '/student/profile';
+        break;
+      case 'counselor':
+        currentNavLinks = counselorNavLinks;
+        profilePath = '/counselor/profile';
+        break;
+      case 'admin':
+        currentNavLinks = adminNavLinks;
+        profilePath = '/admin/profile';
+        break;
+      default:
+        currentNavLinks = landingNavLinks;
     }
   } else {
     currentNavLinks = landingNavLinks;
@@ -112,10 +120,14 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 fixed w-full z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-20 items-center">
           <Link to="/" className="flex items-center">
-            <img src={Logo} alt="MindfulU Logo" className="h-12 w-auto" />
-            <h1 className="text-2xl font-bold text-purple-600 ml-1">NeuroWell</h1>
+            <img 
+              src="/Logo.jpg" 
+              alt="NeuroWell Logo" 
+              className="h-20 w-auto rounded-lg" 
+            />
+            <h1 className="text-2xl font-bold text-purple-600">NeuroWell</h1>
           </Link>
 
           {/* Desktop Navigation */}
@@ -244,9 +256,12 @@ const Navbar: React.FC = () => {
           {/* Mobile Menu Header */}
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center space-x-2">
-              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
-                <img src={Logo} alt="MindfulU Logo" className="h-12 w-auto" />
-              </div>
+              <img 
+                src="/Logo.jpg" 
+                alt="NeuroWell Logo" 
+                className="h-16 w-auto rounded-lg" 
+              />
+              <span className="text-xl font-bold text-purple-600">NeuroWell</span>
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
@@ -286,11 +301,16 @@ const Navbar: React.FC = () => {
                 <span className="font-medium">Profile</span>
               </Link>
               <button
-                onClick={() => {
-                  logout();
-                  setIsMobileMenuOpen(false);
+                onClick={async () => {
+                  try {
+                    await logout();
+                    setIsMobileMenuOpen(false);
+                    navigate('/login');
+                  } catch (error) {
+                    console.error('Failed to log out:', error);
+                  }
                 }}
-                className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full text-left"
               >
                 <LogOut size={18} className="text-gray-400" />
                 <span className="font-medium">Logout</span>

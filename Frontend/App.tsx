@@ -32,23 +32,31 @@ import NotificationsPage from './src/pages/student/Notification';
 // Protected Route Component
 import { useNavigate } from 'react-router-dom';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, loading, user } = useAuth();
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/login', { replace: true });
+    } else if (!loading && isAuthenticated && allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
+      // Redirect to appropriate dashboard based on user role
+      const dashboardPath = `/${user.role}/dashboard`;
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [isAuthenticated, loading, user, allowedRoles, navigate]);
+
   if (loading) {
-    return <div>Loading...</div>; // Or a loading spinner
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles && user && !allowedRoles.includes(user.role || '')) {
-    // Redirect to a default dashboard or an unauthorized page
-    // For now, let's redirect to the landing page or a generic dashboard
-    // You might want a more specific redirect based on your app's logic
-    return <Navigate to="/" replace />; 
+  if (!isAuthenticated || (allowedRoles && user?.role && !allowedRoles.includes(user.role))) {
+    return null; // Navigation will be handled by the useEffect
   }
 
   return <>{children}</>;
@@ -62,11 +70,12 @@ const App: React.FC = () => {
           <HashRouter>
             <Layout>
               <Routes>
+                  <Route index element={<LandingPage />} />
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/logout" element={<Logout />} />
-                  <Route path="/contact" element={<ContactPage />} /> {/* New Route */}
+                  <Route path="/contact" element={<ContactPage />} />
                   
                   {/* Student Routes */}
                   <Route path="/student/dashboard" element={
@@ -115,7 +124,6 @@ const App: React.FC = () => {
                   <Route path="/services/chatboat" element={<ChatboatPage />} />
                   <Route path="/services/exercise" element={<ExercisePage />} />
 
-                  {/* Counselor Routes */}
                   {/* Counselor Routes */}
                   <Route path="/counselor/dashboard" element={
                     <ProtectedRoute allowedRoles={['counselor']}>

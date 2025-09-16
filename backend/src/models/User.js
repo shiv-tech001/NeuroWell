@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
+    minlength: [8, 'Password must be at least 8 characters'],
     select: false // Don't include password in queries by default
   },
   
@@ -156,10 +156,7 @@ userSchema.virtual('age').get(function() {
 });
 
 // Indexes for performance
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
-userSchema.index({ studentId: 1 }, { sparse: true });
-userSchema.index({ licenseNumber: 1 }, { sparse: true });
 userSchema.index({ createdAt: -1 });
 
 // Pre-save middleware to hash password

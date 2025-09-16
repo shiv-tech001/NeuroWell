@@ -1,4 +1,5 @@
-const User = require('../models/User');
+const Student = require('../models/Student');
+const Counselor = require('../models/Counselor');
 const { validationResult } = require('express-validator');
 const { MESSAGES } = require('../constants/messages');
 const { uploadImage, deleteImage } = require('../config/cloudinary');
@@ -10,7 +11,13 @@ const { uploadImage, deleteImage } = require('../config/cloudinary');
  */
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    // Try to find user in Student collection first
+    let user = await Student.findById(req.user.id);
+    
+    if (!user) {
+      // If not found in Student, try Counselor collection
+      user = await Counselor.findById(req.user.id);
+    }
     
     if (!user) {
       return res.status(404).json({
@@ -342,7 +349,6 @@ const getCounselors = async (req, res) => {
     const { specialization, page = 1, limit = 10 } = req.query;
 
     const query = { 
-      role: 'counselor', 
       isActive: true,
       isEmailVerified: true 
     };
@@ -352,18 +358,26 @@ const getCounselors = async (req, res) => {
       query.specialization = { $in: [specialization] };
     }
 
-    const options = {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      select: 'firstName lastName email avatar specialization qualification experience',
-      sort: { createdAt: -1 }
-    };
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const counselors = await Counselor.find(query)
+      .select('firstName lastName email avatar specialization qualification experience rating')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
 
-    const counselors = await User.paginate(query, options);
+    const total = await Counselor.countDocuments(query);
 
     res.json({
       success: true,
-      data: counselors
+      data: {
+        counselors,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / parseInt(limit)),
+          total
+        }
+      }
     });
 
   } catch (error) {

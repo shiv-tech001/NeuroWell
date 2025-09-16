@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const Student = require('../models/Student');
+const Counselor = require('../models/Counselor');
 const { MESSAGES } = require('../constants/messages');
 
 /**
@@ -18,8 +19,12 @@ const protect = async (req, res, next) => {
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Get user from database and attach to request
-        const user = await User.findById(decoded.id);
+        // Get user from database - try both Student and Counselor collections
+        let user = await Student.findById(decoded.id);
+        
+        if (!user) {
+          user = await Counselor.findById(decoded.id);
+        }
         
         if (!user) {
           return res.status(401).json({
@@ -105,8 +110,12 @@ const optionalAuth = async (req, res, next) => {
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Get user from database and attach to request
-        const user = await User.findById(decoded.id);
+        // Get user from database - try both Student and Counselor collections
+        let user = await Student.findById(decoded.id);
+        
+        if (!user) {
+          user = await Counselor.findById(decoded.id);
+        }
         
         if (user && user.isActive) {
           req.user = user;

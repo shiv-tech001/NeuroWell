@@ -34,7 +34,40 @@ const LandingPage: React.FC = () => {
     </Link>
   </div>
 
+<<<<<<< HEAD
   {/* Animation styles moved to global CSS */}
+=======
+  {/* Custom styles for animation */}
+  <style jsx>{`
+    /* Breathing scale animation */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .animate-floatUpDown {
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    /* Delayed fade-in for paragraph */
+    @keyframes fadeInDelayed {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    .animate-fadeInDelayed {
+      animation: fadeInDelayed 2s ease forwards;
+      animation-delay: 1s;
+    }
+
+    /* Slower pulse for button */
+    @keyframes pulseSlower {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .animate-pulse-slower {
+      animation: pulseSlower 5s ease-in-out infinite;
+    }
+  `}</style>
+>>>>>>> 936eb34f0880ad473f8d2ef2802eb1007ed5aa87
 </section>
 
 

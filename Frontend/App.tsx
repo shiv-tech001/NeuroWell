@@ -26,6 +26,7 @@ import ServicesPage from './src/pages/services/services';
 import ChatboatPage from './src/pages/services/Chatboat';
 import ExercisePage from './src/pages/services/Excercise';
 import ContactPage from './src/pages/ContactPage'; // New import
+import NotificationsPage from './src/pages/student/Notification';
 
 // Protected Route Component
 // Protected Route Component
@@ -101,6 +102,11 @@ const App: React.FC = () => {
                   <Route path="/student/profile" element={
                     <ProtectedRoute allowedRoles={['student']}>
                       <Profile />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notifications" element={
+                    <ProtectedRoute allowedRoles={['student']}>
+                      <NotificationsPage />
                     </ProtectedRoute>
                   } />
 

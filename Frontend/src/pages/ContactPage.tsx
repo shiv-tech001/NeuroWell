@@ -136,7 +136,7 @@ const ContactPageBody = () => {
       <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
         {/* Office Hours */}
         <div className="flex-1 bg-[#edefff] rounded-2xl p-7 shadow items-start">
-          <div className="text-lg font-semibold mb-2 text-gray-800">Office Hours</div>
+          <div className="text-lg font-semibold mb-2 text-gray-800">NeuroWell Office Hours</div>
           <p className="text-gray-600 text-sm mb-4">Our team is available to assist you during the following hours:</p>
           <table className="w-full text-left text-sm">
             <tbody>

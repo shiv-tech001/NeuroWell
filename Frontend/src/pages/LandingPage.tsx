@@ -1,214 +1,882 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ChatBubbleIcon, CalendarIcon, UsersIcon } from '@components/icons';
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import {
+  Users,
+  Bot,
+  Book,
+  Music,
+  LineChart,
+  AlertTriangle,
+  Star,
+  Sparkles,
+  Heart,
+  Shield,
+  Zap,
+  ArrowRight,
+  CheckCircle,
+  Globe,
+  Rocket,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-const LandingPage: React.FC = () => {
+export default function LandingPage() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
+
+  useEffect(() => {
+    setIsVisible(true);
+    const interval = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % reviews.length);
+    }, 4000);
+    
+    // Add smooth scrolling behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    return () => {
+      clearInterval(interval);
+      document.documentElement.style.scrollBehavior = 'auto';
+    };
+  }, []);
+
+  const features = [
+    {
+      icon: <Users className="w-12 h-12" />,
+      title: "Student-Counselor Connection",
+      desc: "Connect with certified counselors for personalized support and guidance.",
+      gradient: "from-purple-500 via-pink-500 to-red-500",
+      delay: 0.1,
+    },
+    {
+      icon: <Bot className="w-12 h-12" />,
+      title: "AI Chatbot",
+      desc: "Get immediate 24/7 assistance from our intelligent AI companion.",
+      gradient: "from-blue-500 via-cyan-500 to-teal-500",
+      delay: 0.2,
+    },
+    {
+      icon: <Book className="w-12 h-12" />,
+      title: "Motivational Resources",
+      desc: "Access curated library of books, articles, and wellness content.",
+      gradient: "from-green-500 via-emerald-500 to-teal-500",
+      delay: 0.3,
+    },
+    {
+      icon: <Music className="w-12 h-12" />,
+      title: "Relaxing Music Therapy",
+      desc: "Discover healing soundscapes and therapeutic music playlists.",
+      gradient: "from-yellow-500 via-orange-500 to-red-500",
+      delay: 0.4,
+    },
+    {
+      icon: <LineChart className="w-12 h-12" />,
+      title: "Mood Tracking & Analytics",
+      desc: "Track emotional patterns with advanced analytics and insights.",
+      gradient: "from-indigo-500 via-purple-500 to-pink-500",
+      delay: 0.5,
+    },
+    {
+      icon: <AlertTriangle className="w-12 h-12" />,
+      title: "Emergency SOS System",
+      desc: "Instant crisis support with one-tap emergency assistance.",
+      gradient: "from-red-500 via-pink-500 to-rose-500",
+      delay: 0.6,
+    },
+  ];
+
+  const reviews = [
+    {
+      name: "Ananya Sharma",
+      review: "This platform completely transformed my mental health journey. The AI chatbot feels like talking to a caring friend who's always there.",
+      rating: 5,
+      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+      role: "Computer Science Student",
+      university: "IIT Delhi",
+    },
+    {
+      name: "Rahul Verma",
+      review: "The counselor connection feature saved my academic career. Professional support when I needed it most, available 24/7.",
+      rating: 5,
+      avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+      role: "Engineering Student",
+      university: "NIT Trichy",
+    },
+    {
+      name: "Priya Singh",
+      review: "Mood tracking helped me understand my patterns. The insights are incredible and the music therapy is so soothing.",
+      rating: 5,
+      avatar: "https://randomuser.me/api/portraits/women/52.jpg",
+      role: "Medical Student",
+      university: "AIIMS New Delhi",
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 100,
+      },
+    },
+  };
+
+  const floatingVariants = {
+    animate: {
+      y: [-10, 10, -10],
+      rotate: [0, 5, 0],
+      transition: {
+        duration: 3,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
+  };
+
   return (
-    <div className="relative min-h-screen font-sans text-gray-700 overflow-hidden bg-gradient-to-br from-purple-200 via-purple-100 to-purple-300">
-      {/* Subtle Floating Light Highlights */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <span className="absolute top-24 left-32 w-24 h-24 bg-purple-400 rounded-full opacity-30 animate-pulse mix-blend-multiply filter blur-3xl"></span>
-        <span className="absolute top-72 right-28 w-36 h-36 bg-purple-300 rounded-full opacity-20 animate-pulse mix-blend-multiply filter blur-3xl"></span>
-        <span className="absolute bottom-32 left-24 w-40 h-40 bg-purple-300 rounded-full opacity-25 animate-pulse mix-blend-multiply filter blur-3xl"></span>
+<div className="w-full font-sans overflow-x-hidden relative isolate">      {/* Global Styles for Smooth Scrolling */}
+      <style>{`
+        html {
+          scroll-behavior: smooth;
+          scroll-padding-top: 5rem; 
+        }
+        
+        * {
+          scroll-behavior: smooth;
+        }
+        
+        body {
+          overflow-x: hidden;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(45deg, #6366f1, #8b5cf6);
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(45deg, #4f46e5, #7c3aed);
+        }
+      `}</style>
+
+      {/* Animated Background Elements - Fixed z-index */}
+      <div className="fixed inset-0 -z-20">
+        <motion.div
+          style={{ y, opacity }}
+          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute top-40 right-20 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 180, 0],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-1/3 w-64 h-64 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [-50, 50, -50],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
-      <div>
-   {/* Hero Section */}
-<section id="home" className="container mx-auto px-6 pt-24 pb-20 text-center">
-  <div className="max-w-3xl mx-auto">
-    <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-purple-900 mb-6 select-none animate-floatUpDown">
-      Your Journey to Mental<br />
-      Wellness Starts Here
-    </h1>
+      {/* Hero Section - Added proper padding for navbar */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 -z-10" />
+        
+        {/* Floating Elements - Fixed z-index */}
+        <motion.div
+          variants={floatingVariants}
+          animate="animate"
+          className="absolute top-32 left-20 w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-20 -z-10"
+        />
+        <motion.div
+          variants={floatingVariants}
+          animate="animate"
+          className="absolute top-52 right-32 w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg opacity-30 rotate-45 -z-10"
+        />
+        <motion.div
+          variants={floatingVariants}
+          animate="animate"
+          className="absolute bottom-44 left-40 w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full opacity-25 -z-10"
+        />
 
-    <p className="text-lg text-purple-700 mb-12 leading-relaxed opacity-0 animate-fadeInDelayed">
-      NeuroWell provides students with the tools and support they need to thrive mentally and emotionally. 
-      Explore our services and begin your path to a healthier, happier you.
-    </p>
+        <div className="container mx-auto px-6 py-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="space-y-8"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-lg border border-purple-200 px-6 py-3 rounded-full"
+              >
+                <Sparkles className="w-5 h-5 text-purple-600" />
+                <span className="text-purple-700 font-semibold">AI-Powered Mental Health Platform</span>
+              </motion.div>
 
-    <Link
-      to="/services"
-      className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold px-10 py-4 rounded-full transition shadow-md hover:shadow-xl text-lg ring-2 ring-purple-300 animate-pulse-slower hover:scale-105"
-    >
-      Explore Services
-    </Link>
-  </div>
+              <motion.h1
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight"
+              >
+                <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Empowering
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent">
+                  Students,
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-pink-600 via-red-600 to-orange-600 bg-clip-text text-transparent">
+                  Connecting
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 bg-clip-text text-transparent">
+                  Counselors
+                </span>
+              </motion.h1>
 
-  {/* Animation styles moved to global CSS */}
-</section>
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="text-xl text-gray-700 leading-relaxed max-w-lg"
+              >
+                Transform your mental health journey with our revolutionary platform. 
+                Connect with certified counselors, leverage AI support, and access 
+                personalized wellness resources in a safe, nurturing environment.
+              </motion.p>
 
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="flex flex-col sm:flex-row gap-6"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(99, 102, 241, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="group relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl overflow-hidden transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative flex items-center gap-3">
+                    <Rocket className="w-6 h-6" />
+                    <Link to="/login">Start Your Journey</Link>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </motion.button>
 
+              </motion.div>
 
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                className="flex flex-wrap items-center gap-6 text-sm text-gray-600"
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>100% Confidential</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>24/7 Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>AI-Powered</span>
+                </div>
+              </motion.div>
+            </motion.div>
 
-        {/* Empowering Section */}
-        <section className="py-20 bg-transparent">
-          <div className="container mx-auto px-6">
-            <h2 className="text-4xl font-bold text-purple-900 text-center mb-16 select-none">
-              Empowering Your Mental Health
+            <motion.div
+              initial={{ opacity: 0, x: 100, rotate: -10 }}
+              animate={{ opacity: 1, x: 0, rotate: 0 }}
+              transition={{ duration: 1, delay: 0.3, type: "spring", stiffness: 100 }}
+              className="relative"
+            >
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-red-500/30 rounded-3xl blur-2xl" />
+                  <motion.img
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    src="/LandingPage.jpg"
+                    alt="Student Mental Health Support"
+                    className="relative w-full max-w-2xl drop-shadow-2xl rounded-3xl"
+                  />                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 1.5, type: "spring", stiffness: 200 }}
+                  className="absolute -top-6 -right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl"
+                >
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">24/7</div>
+                    <div className="text-xs opacity-90">Support</div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 1.7, type: "spring", stiffness: 200 }}
+                  className="absolute -bottom-6 -left-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-2xl shadow-2xl"
+                >
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">AI</div>
+                    <div className="text-xs opacity-90">Powered</div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Challenge Section - Added scroll-margin for smooth navigation */}
+      <section id="challenge" className="py-20 md:py-32 px-6 md:px-20 relative scroll-mt-24">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-purple-50/30 to-pink-50/30 -z-10" />
+        <div className="container mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-20"
+          >
+            <motion.h2
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 bg-gradient-to-r from-gray-900 via-purple-800 to-pink-800 bg-clip-text text-transparent"
+            >
+              The Crisis & Our Innovation
+            </motion.h2>
+            <motion.p
+              initial={{ y: 30, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed"
+            >
+              Student mental health is in crisis. With{" "}
+              <motion.span
+                whileHover={{ scale: 1.1 }}
+                className="font-bold text-transparent bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text cursor-pointer"
+              >
+                75%
+              </motion.span>{" "}
+              reporting significant stress, we're revolutionizing mental wellness with AI-powered, comprehensive support.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {[
+              {
+                icon: <Users className="w-16 h-16" />,
+                title: "Certified Counselors",
+                desc: "Connect with licensed professionals for personalized, confidential support tailored to your needs.",
+                gradient: "from-blue-500 via-indigo-500 to-purple-500",
+                shadowColor: "shadow-blue-500/25",
+              },
+              {
+                icon: <Bot className="w-16 h-16" />,
+                title: "AI Mental Health Companion",
+                desc: "24/7 intelligent support with empathetic responses and evidence-based therapeutic techniques.",
+                gradient: "from-purple-500 via-pink-500 to-red-500",
+                shadowColor: "shadow-purple-500/25",
+              },
+              {
+                icon: <LineChart className="w-16 h-16" />,
+                title: "Advanced Mood Analytics",
+                desc: "Track emotional patterns with ML insights, predictive analytics, and personalized recommendations.",
+                gradient: "from-green-500 via-emerald-500 to-teal-500",
+                shadowColor: "shadow-green-500/25",
+              },
+              {
+                icon: <AlertTriangle className="w-16 h-16" />,
+                title: "Crisis Intervention",
+                desc: "Immediate emergency response system with instant professional intervention capabilities.",
+                gradient: "from-red-500 via-orange-500 to-yellow-500",
+                shadowColor: "shadow-red-500/25",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                variants={itemVariants}
+                whileHover={{ 
+                  y: -15, 
+                  scale: 1.05,
+                  transition: { duration: 0.3 }
+                }}
+                className={`group relative p-8 md:p-10 rounded-3xl bg-white/80 backdrop-blur-lg border border-white/50 ${item.shadowColor} shadow-2xl hover:shadow-4xl transition-all duration-500 overflow-hidden`}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-all duration-500`} />
+                <div className="relative z-10">
+                  <div className={`text-transparent bg-gradient-to-r ${item.gradient} bg-clip-text mb-6 transform group-hover:scale-110 transition-transform duration-300`}>
+                    {item.icon}
+                  </div>
+                  <h3 className="font-bold text-xl mb-4 text-gray-900 group-hover:text-gray-800">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700">
+                    {item.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 md:py-32 px-6 md:px-20 relative overflow-hidden scroll-mt-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 -z-10">
+          <div className="absolute inset-0 opacity-30" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }} />
+        </div>
+        
+        <div className="container mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+              Revolutionary Features
             </h2>
-            <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-              {[{
-                icon: <ChatBubbleIcon className="h-10 w-10 text-purple-600" />,
-                title: "AI-Powered Chatbot",
-                description: "Get instant support and guidance from our AI chatbot, available 24/7 to answer your questions."
-              }, {
-                icon: <UsersIcon className="h-10 w-10 text-purple-600" />,
-                title: "Peer Support Community",
-                description: "Connect with fellow students in a safe and supportive community."
-              }, {
-                icon: <CalendarIcon className="h-10 w-10 text-purple-600" />,
-                title: "Easy Appointment Booking",
-                description: "Schedule appointments with licensed therapists and counselors easily."
-              }].map(({icon, title, description}, idx) => (
-                <div key={idx} className="text-center bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 cursor-pointer select-none">
-                  <div className="bg-purple-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    {icon}
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              Cutting-edge technology meets compassionate care in our comprehensive mental health ecosystem.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: feature.delay }}
+                whileHover={{ 
+                  y: -20, 
+                  scale: 1.05,
+                  transition: { duration: 0.3 }
+                }}
+                viewport={{ once: true, margin: "-50px" }}
+                className="group relative"
+              >
+                <div className="relative p-8 rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 hover:border-white/40 transition-all duration-500 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-20 transition-all duration-500`} />
+                  
+                  <div className="relative z-10">
+                    <div className={`text-transparent bg-gradient-to-r ${feature.gradient} bg-clip-text mb-6 transform group-hover:scale-110 transition-all duration-300`}>
+                      {feature.icon}
+                    </div>
+                    <h3 className="font-bold text-xl mb-4 text-white group-hover:text-blue-100">
+                      {feature.title}
+                    </h3>
+                    <p className="text-blue-100 leading-relaxed group-hover:text-white transition-colors duration-300">
+                      {feature.desc}
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold text-purple-900 mb-4">{title}</h3>
-                  <p className="text-purple-700 leading-relaxed">{description}</p>
+
+                  <motion.div
+                    className="absolute top-4 right-4 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100"
+                    animate={{
+                      scale: [0, 1, 0],
+                      opacity: [0, 1, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: Math.random() * 2,
+                    }}
+                  />
                 </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works */}
+      <section id="how-it-works" className="py-20 md:py-32 px-6 md:px-20 relative scroll-mt-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 -z-10" />
+        <div className="container mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent">
+              Simple. Powerful. Effective.
+            </h2>
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              Your journey to better mental health starts with three simple steps.
+            </p>
+          </motion.div>
+
+          <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {[
+                {
+                  num: "01",
+                  title: "Sign Up Instantly",
+                  desc: "Create your secure, confidential account in under 60 seconds with bank-level encryption.",
+                  gradient: "from-blue-500 to-cyan-500",
+                  icon: <Globe className="w-8 h-8" />,
+                },
+                {
+                  num: "02",
+                  title: "Personalized Dashboard",
+                  desc: "Access your AI-curated dashboard with personalized insights, resources, and connection options.",
+                  gradient: "from-purple-500 to-pink-500",
+                  icon: <Zap className="w-8 h-8" />,
+                },
+                {
+                  num: "03",
+                  title: "Connect & Heal",
+                  desc: "Engage with counselors, track progress, and access emergency support whenever needed.",
+                  gradient: "from-green-500 to-emerald-500",
+                  icon: <Heart className="w-8 h-8" />,
+                },
+              ].map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: i * 0.2 }}
+                  whileHover={{ y: -10, scale: 1.03, transition: { duration: 0.3 } }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  className="relative group"
+                >
+                  <div className="relative p-10 rounded-3xl bg-white shadow-2xl hover:shadow-4xl transition-all duration-500 overflow-hidden">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient} opacity-0 group-hover:opacity-10 transition-all duration-500`} />
+                    
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${step.gradient} text-white flex items-center justify-center font-black text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                          {step.num}
+                        </div>
+                        <div className={`text-transparent bg-gradient-to-r ${step.gradient} bg-clip-text group-hover:scale-110 transition-transform duration-300`}>
+                          {step.icon}
+                        </div>
+                      </div>
+                      
+                      <h4 className="font-bold text-2xl mb-4 text-gray-900 group-hover:text-gray-800">
+                        {step.title}
+                      </h4>
+                      <p className="text-gray-600 leading-relaxed text-lg group-hover:text-gray-700">
+                        {step.desc}
+                      </p>
+                    </div>
+
+                    {i < 2 && (
+                      <div className="hidden md:block absolute top-1/2 -right-6 w-12 h-0.5 bg-gradient-to-r from-gray-300 to-gray-400 transform -translate-y-1/2">
+                        <motion.div
+                          className={`h-full bg-gradient-to-r ${step.gradient} w-0`}
+                          whileInView={{ width: "100%" }}
+                          transition={{ duration: 1, delay: (i + 1) * 0.5 }}
+                          viewport={{ once: true }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
-        </section>
-        {/* how it works section */}
+        </div>
+      </section>
 
-        <section className="py-20 bg-gray-50">
-                    <div className="container mx-auto px-6">
-                        <h2 className="text-4xl font-bold text-gray-800 text-center mb-16">How It Works</h2>
-                        
-                        {/* Video Placeholder */}
-                        <div className="max-w-4xl mx-auto mb-16">
-                            <div className="bg-white rounded-2xl shadow-lg p-8 aspect-video flex items-center justify-center">
-                                <div className="text-center">
-                                    <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <p className="text-gray-500 text-lg">Watch this quick tour to see how NeuroWell can support you.</p>
-                                </div>
-                            </div>
-                        </div>
+      {/* Impact Section */}
+      <section id="impact" className="py-20 md:py-32 px-6 md:px-20 relative overflow-hidden scroll-mt-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 -z-10">
+          <div className="absolute inset-0 opacity-20" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }} />
+        </div>
 
-                        {/* Steps */}
-                        <div className="max-w-4xl mx-auto">
-                            {/* Step 1 */}
-                            <div className="flex items-start mb-12 group">
-                                <div className="flex-shrink-0 mr-6">
-                                    <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg group-hover:bg-purple-700 transition">
-                                        1
-                                    </div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Sign Up</h3>
-                                        <button className="text-purple-600 hover:text-purple-700 transition">
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <p className="text-gray-600">Create your free account in minutes to get started.</p>
-                                </div>
-                            </div>
+        <div className="container mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+              Transforming Lives Daily
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              Real impact, real change, real support for students worldwide.
+            </p>
+          </motion.div>
 
-                            {/* Step 2 */}
-                            <div className="flex items-start mb-12 group">
-                                <div className="flex-shrink-0 mr-6">
-                                    <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg group-hover:bg-purple-700 transition">
-                                        2
-                                    </div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Access Resources</h3>
-                                        <button className="text-purple-600 hover:text-purple-700 transition">
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <p className="text-gray-600">Explore our library of wellness tools.</p>
-                                </div>
-                            </div>
-
-                            {/* Step 3 */}
-                            <div className="flex items-start mb-12 group">
-                                <div className="flex-shrink-0 mr-6">
-                                    <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg group-hover:bg-purple-700 transition">
-                                        3
-                                    </div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Book Appointments</h3>
-                                        <button className="text-purple-600 hover:text-purple-700 transition">
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <p className="text-gray-600">Schedule a session with a therapist.</p>
-                                </div>
-                            </div>
-                        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { number: "1000+", label: "Students Supported", icon: <Users className="w-8 h-8" />, gradient: "from-blue-400 to-cyan-400" },
+              { number: "100+", label: "Certified Counselors", icon: <Shield className="w-8 h-8" />, gradient: "from-purple-400 to-pink-400" },
+              { number: "24/7", label: "AI Support Available", icon: <Bot className="w-8 h-8" />, gradient: "from-green-400 to-emerald-400" },
+              { number: "95%", label: "Satisfaction Rate", icon: <Star className="w-8 h-8" />, gradient: "from-yellow-400 to-orange-400" },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.8, y: 50 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: i * 0.1 }}
+                whileHover={{ scale: 1.05, y: -10, transition: { duration: 0.3 } }}
+                viewport={{ once: true, margin: "-50px" }}
+                className="relative group"
+              >
+                <div className="p-10 rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 hover:border-white/40 transition-all duration-500 text-center overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-20 transition-all duration-500`} />
+                  
+                  <div className="relative z-10">
+                    <div className={`text-transparent bg-gradient-to-r ${stat.gradient} bg-clip-text mb-4 flex justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      {stat.icon}
                     </div>
-                </section>
-
-        {/* Testimonials Section */}
-        <section className="py-20 bg-purple-50 rounded-lg mx-10 md:mx-24 shadow-lg mt-16">
-          <div className="container mx-auto px-6">
-            <h2 className="text-4xl font-bold text-purple-900 text-center mb-16 select-none">What Students Are Saying</h2>
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[{
-                name: "Sophia Carter",
-                date: "May 15, 2024",
-                text: `"NeuroWell has been a game-changer for me. The AI chatbot is incredibly helpful, and the peer support community has made me feel less alone. Highly recommend!"`,
-                img: "https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=50&h=50&fit=crop&crop=face"
-              }, {
-                name: "Ethan Bennett",
-                date: "Apr 27, 2024",
-                text: `"The appointment booking process was straightforward, and I found a therapist who truly understands my needs. The platform is user-friendly and effective."`,
-                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"
-              }, {
-                name: "Olivia Hayes",
-                date: "Mar 12, 2024",
-                text: `"I love the resources and support NeuroWell offers. It's made a significant positive impact on my mental well-being. Thank you for creating each valuable service."`,
-                img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face"
-              }].map(({name, date, text, img}, idx) => (
-                <div key={idx} className="bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition cursor-default">
-                  <div className="flex items-center mb-4">
-                    <img src={img} alt={name} className="w-12 h-12 rounded-full mr-4" />
-                    <div>
-                      <h4 className="font-semibold text-purple-900">{name}</h4>
-                      <p className="text-sm text-purple-700">{date}</p>
-                    </div>
+                    <h3 className="text-4xl md:text-5xl font-black text-white mb-2 group-hover:text-blue-100">
+                      {stat.number}
+                    </h3>
+                    <p className="text-blue-100 text-lg group-hover:text-white transition-colors duration-300">
+                      {stat.label}
+                    </p>
                   </div>
-                  <p className="text-purple-700 italic">{text}</p>
                 </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Testimonials */}
+      <section id="testimonials" className="py-20 md:py-32 px-6 md:px-20 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 scroll-mt-24">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 bg-gradient-to-r from-gray-900 via-purple-800 to-pink-800 bg-clip-text text-transparent">
+              Student Success Stories
+            </h2>
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              Hear from students whose lives have been transformed through our platform.
+            </p>
+          </motion.div>
+
+          <div className="relative max-w-6xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentTestimonial}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+                className="relative"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  <div className="relative">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className="relative p-10 rounded-3xl bg-white shadow-2xl border border-purple-100"
+                    >
+                      <div className="absolute -top-4 -left-4 text-6xl text-purple-300 font-serif">"</div>
+                      <div className="relative z-10">
+                        <div className="flex mb-4">
+                          {[...Array(reviews[currentTestimonial].rating)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
+                            >
+                              <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                            </motion.div>
+                          ))}
+                        </div>
+                        <p className="text-xl text-gray-700 leading-relaxed mb-6 italic">
+                          {reviews[currentTestimonial].review}
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <motion.img
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            src={reviews[currentTestimonial].avatar}
+                            alt={reviews[currentTestimonial].name}
+                            className="w-16 h-16 rounded-full border-4 border-purple-200 shadow-lg"
+                          />
+                          <div>
+                            <h4 className="font-bold text-xl text-gray-900">
+                              {reviews[currentTestimonial].name}
+                            </h4>
+                            <p className="text-purple-600 font-semibold">
+                              {reviews[currentTestimonial].role}
+                            </p>
+                            <p className="text-gray-500 text-sm">
+                              {reviews[currentTestimonial].university}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  <div className="relative">
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.3, duration: 0.8 }}
+                      className="relative"
+                    >
+                      <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-rose-500/30 rounded-3xl blur-2xl" />
+                      <img
+                        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+                        alt="Happy students"
+                        className="relative w-full rounded-3xl shadow-2xl"
+                      />
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="flex justify-center mt-12 gap-3">
+              {reviews.map((_, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setCurrentTestimonial(i)}
+                  className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                    i === currentTestimonial
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 scale-125"
+                      : "bg-gray-300 hover:bg-purple-300"
+                  }`}
+                />
               ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Start Your Journey CTA */}
-        <section className="py-20 bg-purple-400 text-white text-center rounded-lg mx-16 mt-16 shadow-lg select-none">
-  <h2 className="text-4xl font-extrabold mb-6">Ready to Start Your Mental Wellness Journey?</h2>
-  <p className="text-xl mb-8 max-w-2xl mx-auto">
-    Join thousands of students who have already begun their path to better mental health with NeuroWell.
-  </p>
-  <Link
-    to="/register"
-    className="inline-block bg-white text-purple-700 font-bold px-12 py-4 rounded-full shadow-md hover:shadow-xl transition"
-  >
-    Start Your Journey
-  </Link>
-</section>
+      {/* CTA Section */}
+      <section id="cta" className="py-20 md:py-32 px-6 md:px-20 relative overflow-hidden scroll-mt-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 -z-10">
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+        
+        <div className="container mx-auto relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="max-w-4xl mx-auto"
+          >
+            <motion.h2
+              initial={{ scale: 0.8 }}
+              whileInView={{ scale: 1 }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+              className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-tight"
+            >
+              Ready to Transform Your
+              <br />
+              <span className="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
+                Mental Health Journey?
+              </span>
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl md:text-2xl text-blue-100 mb-12 leading-relaxed"
+            >
+              Join thousands of students who have already started their path to better mental health.
+              Your journey begins with a single click.
+            </motion.p>
 
-      </div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="group relative bg-white text-indigo-600 px-12 py-6 rounded-2xl font-black text-xl shadow-2xl hover:shadow-4xl transition-all duration-300 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-pink-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative flex items-center gap-3">
+                  <Rocket className="w-7 h-7" />
+                  <Link to="/login">Start Free Today</Link>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </motion.button>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="flex items-center gap-4 text-blue-100"
+              >
+                <CheckCircle className="w-6 h-6 text-green-300" />
+                <span className="text-lg">No credit card required</span>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
-};
-
-export default LandingPage;
+}

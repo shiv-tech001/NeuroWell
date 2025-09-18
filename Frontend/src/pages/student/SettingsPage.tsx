@@ -13,7 +13,7 @@ const SettingsHeader: React.FC = () => (
             <div className="hidden md:flex items-center space-x-8">
                 <Link to="/student/dashboard" className="text-text-medium hover:text-primary">Home</Link>
                 <a href="#" className="text-text-medium hover:text-primary">Wellness</a>
-                <Link to="/student/appointments" className="text-text-medium hover:text-primary">Appointments</Link>
+                <Link to="/student/book-appointment" className="text-text-medium hover:text-primary">Appointments</Link>
                 <Link to="/student/community" className="text-text-medium hover:text-primary">Community</Link>
             </div>
             <div className="flex items-center space-x-4">

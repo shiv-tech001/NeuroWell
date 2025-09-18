@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-
 // Icon Components
 const PlayIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="currentColor" viewBox="0 0 20 20">
@@ -42,8 +41,6 @@ const InteractiveActivityHub: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            
-
             {/* Main Content */}
             <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
                 {/* Page Header */}
@@ -165,8 +162,6 @@ const InteractiveActivityHub: React.FC = () => {
                     </div>
                 </div>
             </main>
-
-            
         </div>
     );
 };

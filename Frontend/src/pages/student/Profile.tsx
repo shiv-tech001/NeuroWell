@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
     UserIcon, 
@@ -13,29 +13,55 @@ import {
     EditIcon,
     SaveIcon
 } from '@components/icons';
+import { authService } from '../../services/authService';
 
 
 const StudentProfilePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('personal-info');
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        fullName: 'Sophia Clark',
-        email: 'sophia.clark@example.com',
+        fullName: '',
+        email: '',
         phoneNumber: '',
         dateOfBirth: '',
-        gender: 'Female',
-        major: 'Psychology',
-        yearOfStudy: '3'
+        gender: '',
+        major: '',
+        yearOfStudy: ''
     });
+    const [user, setUser] = useState<any>(null);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  const fetchProfile = async () => {
+            try {
+                const res = await authService.getProfile();
+                const userData = res.data.user;
+                setUser(userData);
+                setFormData({
+                    fullName: `${userData.firstName} ${userData.lastName}`,
+                    email: userData.email,
+                    phoneNumber: userData.phoneNumber || '',
+                    dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth).toISOString().split('T')[0] : '',
+                    gender: userData.gender || '',
+                    major: userData.major || '',
+                    yearOfStudy: userData.yearOfStudy || ''
+                });
+            } catch (error) {
+                console.error("Failed to fetch profile", error);
+            }
+        };
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
     const student = {
-        id: '123456789',
-        name: 'Sophia Clark',
-        email: 'sophia.clark@example.com',
-        avatar: 'https://picsum.photos/seed/sophia/200/200',
+        id: user?._id || 'N/A',
+        name: user ? `${user.firstName} ${user.lastName}` : 'Loading...',
+        email: user?.email || 'Loading...',
+        avatar: avatarPreview || user?.avatar?.url || 'https://picsum.photos/seed/student/200/200',
         moodTrend: 'improving',
         moodChange: '+15%',
-        joinDate: 'September 2023',
+        joinDate: user ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Loading...',
         totalSessions: 12,
         currentStreak: 7
     };
@@ -58,10 +84,53 @@ const StudentProfilePage: React.FC = () => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSave = () => {
-        setIsEditing(false);
-        // Save logic here
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
     };
+
+    const handleSave = async () => {
+        setIsEditing(false);
+        const [firstName, ...lastName] = formData.fullName.split(' ');
+        
+        const payload: { [key: string]: any } = {
+            firstName,
+            lastName: lastName.join(' '),
+            email: formData.email,
+            phoneNumber: formData.phoneNumber,
+            dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : undefined,
+            gender: formData.gender,
+            major: formData.major,
+            yearOfStudy: formData.yearOfStudy,
+        };
+
+        // Remove empty fields from the payload to avoid validation errors
+        Object.keys(payload).forEach(key => {
+            if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
+                delete payload[key];
+            }
+        });
+
+        try {
+            if (avatarFile) {
+                await authService.uploadAvatar(avatarFile);
+            }
+            await authService.updateProfile(payload);
+            // Refetch profile to show updated avatar and info
+            fetchProfile();
+            setAvatarFile(null);
+            setAvatarPreview(null);
+        } catch (error) {
+            console.error("Failed to update profile", error);
+        }
+    };
+
+    if (!user) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -74,15 +143,22 @@ const StudentProfilePage: React.FC = () => {
                         {/* Profile Header */}
                         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
                             <div className="flex items-start space-x-6">
-                                <div className="relative">
+                                <div className="relative group">
                                     <img 
                                         src={student.avatar} 
                                         alt={student.name}
                                         className="w-24 h-24 rounded-full object-cover border-4 border-purple-100"
                                     />
-                                    <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700">
+                                    <label htmlFor="avatar-upload" className="absolute -bottom-2 -right-2 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 cursor-pointer">
                                         <EditIcon className="h-4 w-4" />
-                                    </button>
+                                    </label>
+                                    <input 
+                                        id="avatar-upload" 
+                                        type="file" 
+                                        className="hidden" 
+                                        accept="image/*"
+                                        onChange={handleAvatarChange}
+                                    />
                                 </div>
                                 <div className="flex-1">
                                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{student.name}</h1>
@@ -177,7 +253,8 @@ const StudentProfilePage: React.FC = () => {
                                                     value={formData.phoneNumber}
                                                     onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                                                     disabled={!isEditing}
-                                                    placeholder="Enter phone number"
+                                                    placeholder="Enter 10-digit phone number"
+                                                    maxLength={10}
                                                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
                                                         !isEditing ? 'bg-gray-50 text-gray-600' : 'bg-white'
                                                     }`}
@@ -212,10 +289,10 @@ const StudentProfilePage: React.FC = () => {
                                                     }`}
                                                 >
                                                     <option value="">Select Gender</option>
-                                                    <option value="Female">Female</option>
-                                                    <option value="Male">Male</option>
-                                                    <option value="Non-binary">Non-binary</option>
-                                                    <option value="Prefer not to say">Prefer not to say</option>
+                                                    <option value="female">Female</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="other">Non-binary</option>
+                                                    <option value="prefer-not-to-say">Prefer not to say</option>
                                                 </select>
                                             </div>
 

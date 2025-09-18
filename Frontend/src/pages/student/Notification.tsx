@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FaBell, FaTrophy, FaExclamationTriangle, FaLeaf, FaTheaterMasks, FaUsers, FaLightbulb, FaRunning, FaMedal, FaComments, FaSpa, FaCalendarAlt, FaExclamationCircle, FaSmile, FaClock } from 'react-icons/fa';
 
 interface NotificationType {
@@ -9,6 +10,7 @@ interface NotificationType {
   message: string;
   time: string;
   actionText?: string;
+  actionLink?: string;
   actionColor?: string;
   bgColor?: string;
   read?: boolean; // added read property
@@ -30,6 +32,7 @@ const NotificationApp: React.FC = () => {
       message: 'Your daily mood check is ready. Take a moment to reflect on your feelings.',
       time: '10m ago',
       actionText: 'Check In',
+      actionLink: '/student/dashboard', // Example link
       actionColor: 'blue'
     },
     {
@@ -40,6 +43,7 @@ const NotificationApp: React.FC = () => {
       message: 'Join the study group for the upcoming psychology exam.',
       time: '30m ago',
       actionText: 'View Group',
+      actionLink: '/student/community', // Example link
       actionColor: 'purple'
     },
     {
@@ -59,6 +63,7 @@ const NotificationApp: React.FC = () => {
       message: 'Take a break and try a 10-minute meditation session.',
       time: '3h ago',
       actionText: 'Start Meditation',
+      actionLink: '/services/Meditation', // Example link
       actionColor: 'green'
     },
     {
@@ -67,7 +72,9 @@ const NotificationApp: React.FC = () => {
       icon: <FaTheaterMasks style={{ color: '#6366f1' }} />,
       title: 'Session Reminder',
       message: 'Your therapy session is today at 3 PM.',
-      time: '4h ago'
+      time: '4h ago',
+      actionText: 'View Session',
+      actionLink: '/student/book-appointment', // Example link
     },
     {
       id: 7,
@@ -188,46 +195,56 @@ const NotificationApp: React.FC = () => {
   });
 
   const NotificationCard: React.FC<NotificationCardProps> = ({ notification, toggleRead }) => {
-    const getCardClasses = (): string => {
-      let baseClasses = 'rounded-xl p-5 shadow-sm flex gap-4 transition-all duration-200 border-l-4 cursor-pointer';
-      if (notification.bgColor === 'emergency') baseClasses += ' border-red-500 bg-red-50';
-      else if (notification.bgColor === 'achievement') baseClasses += ' border-yellow-500 bg-amber-50';
-      else baseClasses += notification.read ? ' border-gray-300 bg-gray-100' : ' border-transparent bg-white';
-      return baseClasses;
-    };
+  const { id, icon, title, message, time, actionText, actionLink, actionColor, bgColor, read } = notification;
 
-    const getActionButtonClasses = (): string => {
-      const baseClasses = 'px-3 py-1.5 rounded-md text-sm font-medium transition-colors';
-      const color = notification.actionColor || '';
-      
-      switch(color) {
-        case 'blue': 
-          return `${baseClasses} bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200`;
-        case 'purple': 
-          return `${baseClasses} bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200`;
-        case 'red': 
-          return `${baseClasses} bg-red-100 text-red-700 hover:bg-red-200 border border-red-200`;
-        case 'green': 
-          return `${baseClasses} bg-green-100 text-green-700 hover:bg-green-200 border border-green-200`;
-        default: 
-          return `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200`;
-      }
-    };
+  const cardBgColor = bgColor === 'achievement' ? 'bg-yellow-50' : 'bg-white';
+  const cardBorderColor = bgColor === 'achievement' ? 'border-yellow-400' : 'border-transparent';
 
-    return (
-      <div className={getCardClasses()} onClick={() => toggleRead(notification.id)}>
-        <div className="flex-shrink-0 pt-0.5">{notification.icon}</div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-gray-900 mb-1">{notification.title}</h3>
-          <p className="text-gray-600 text-sm">{notification.message}</p>
+  const getActionButtonClasses = (): string => {
+    const baseClasses = 'px-3 py-1.5 rounded-md text-sm font-medium transition-colors';
+    const color = actionColor || '';
+    
+    switch(color) {
+      case 'blue': 
+        return `${baseClasses} bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200`;
+      case 'purple': 
+        return `${baseClasses} bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200`;
+      case 'red': 
+        return `${baseClasses} bg-red-100 text-red-700 hover:bg-red-200 border border-red-200`;
+      case 'green': 
+        return `${baseClasses} bg-green-100 text-green-700 hover:bg-green-200 border border-green-200`;
+      default: 
+        return `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200`;
+    }
+  };
+
+  return (
+    <div
+      className={`p-4 rounded-lg shadow-sm transition-all duration-300 ${cardBgColor} border-l-4 ${cardBorderColor} ${read ? 'opacity-60' : ''}`}
+      onClick={() => toggleRead(id)}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-start">
+          <div className="text-2xl mr-4">{icon}</div>
+          <div>
+            <h3 className="font-bold text-gray-800">{title}</h3>
+            <p className="text-gray-600">{message}</p>
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-2 ml-4 min-w-fit">
-          <span className="text-xs text-gray-500 whitespace-nowrap">{notification.time}</span>
-          {notification.actionText && <button className={getActionButtonClasses()}>{notification.actionText}</button>}
+        <div className="text-right ml-4 flex-shrink-0">
+          <p className="text-xs text-gray-500 mb-2">{time}</p>
+          {actionText && actionLink && (
+            <Link to={actionLink}>
+              <button className={getActionButtonClasses()}>
+                {actionText}
+              </button>
+            </Link>
+          )}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   return (
     <div className="min-h-screen bg-gray-50">

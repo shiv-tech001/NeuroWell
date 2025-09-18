@@ -14,16 +14,19 @@ import {
 } from '@heroicons/react/24/outline';
 import { VideoCameraSlashIcon } from '@heroicons/react/24/solid';
 
+
 const patientAvatar = "https://randomuser.me/api/portraits/women/44.jpg";
 const doctorAvatar = "https://randomuser.me/api/portraits/women/45.jpg";
 const consultantAvatar = "https://randomuser.me/api/portraits/men/46.jpg";
 const plantImage = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=96&q=80";
+
 
 const sessionTools = [
   { icon: <ClipboardDocumentListIcon className="w-5 h-5" />, label: "Notes" },
   { icon: <RectangleStackIcon className="w-5 h-5" />, label: "Share Screen" },
   { icon: <CameraIcon className="w-5 h-5" />, label: "Record" },
 ];
+
 
 function MicToolbarIcon({ muted }: { muted: boolean }) {
   return (
@@ -50,6 +53,7 @@ function MicToolbarIcon({ muted }: { muted: boolean }) {
     </div>
   );
 }
+
 
 export default function MindfulUPage() {
   const [chat, setChat] = useState([
@@ -78,8 +82,10 @@ export default function MindfulUPage() {
   const [showModal, setShowModal] = useState(false);
   const [endCallModal, setEndCallModal] = useState(false);
 
+
   // Emergency Protocol modal state
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+
 
   // Session History modal state and data
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -88,12 +94,15 @@ export default function MindfulUPage() {
     { id: 2, date: '2025-09-12', time: '02:30 PM', summary: 'Follow-up session with Sarah' },
   ]);
 
+
   // Notes modal state and content
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [notesContent, setNotesContent] = useState('');
 
+
   // Record state
   const [isRecording, setIsRecording] = useState(false);
+
 
   // Handler for ending call
   const handleEndCall = () => {
@@ -101,6 +110,7 @@ export default function MindfulUPage() {
     alert('Call ended!');
     // Insert additional call cleanup logic if needed
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -127,6 +137,7 @@ export default function MindfulUPage() {
           </div>
         </div>
       )}
+
 
       {/* Follow-up Schedule Modal */}
       {showModal && (
@@ -158,6 +169,7 @@ export default function MindfulUPage() {
         </div>
       )}
 
+
       {/* Emergency Protocol Modal */}
       {showEmergencyModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -188,6 +200,7 @@ export default function MindfulUPage() {
         </div>
       )}
 
+
       {/* Session History Modal */}
       {showHistoryModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -211,6 +224,7 @@ export default function MindfulUPage() {
           </div>
         </div>
       )}
+
 
       {/* Notes Modal */}
       {showNotesModal && (
@@ -243,6 +257,7 @@ export default function MindfulUPage() {
           </div>
         </div>
       )}
+
 
       <div className="grid grid-cols-6 gap-6 px-8 pt-8">
         {/* Sidebar */}
@@ -364,6 +379,7 @@ export default function MindfulUPage() {
           </div>
         </div>
 
+
         {/* Main Video Session */}
         <div className="col-span-3 flex flex-col items-center justify-start">
           <div className="bg-white rounded-xl shadow flex flex-col items-center justify-between p-10 w-full relative" style={{ height: "650px" }}>
@@ -418,6 +434,7 @@ export default function MindfulUPage() {
             </div>
           </div>
         </div>
+
 
         {/* Chat Sidebar */}
         <div className="col-span-2 flex flex-col">

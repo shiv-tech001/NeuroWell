@@ -52,10 +52,10 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const studentNavLinks = [
-    { to: '/student/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+    { to: '/student/dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
     { to: '/student/community', label: 'Community', icon: <Users2 size={18} /> },
-    { to: '/services', label: 'Resources', icon: <BookText size={18} /> },
-    { to: '/contact', label: 'Contact', icon: <Mail size={18} /> },
+    { to: '/services', label: 'Services', icon: <BookText size={18} /> },
+    { to: '/student/book-appointment', label: 'Appointment', icon: <Calendar size={18} /> },
   ];
 
   const counselorNavLinks = [
@@ -77,7 +77,7 @@ const Navbar: React.FC = () => {
 
   const landingNavLinks = [
     { to: '/', label: 'Home', icon: <Home size={18} /> },
-    { to: '/services', label: 'Resources', icon: <BookText size={18} /> },
+   
     { to: '/contact', label: 'Contact', icon: <Mail size={18} /> },
   ];
   

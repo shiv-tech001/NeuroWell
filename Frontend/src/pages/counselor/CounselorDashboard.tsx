@@ -3,10 +3,9 @@ import { FaCheckCircle, FaUserMd, FaBell } from "react-icons/fa";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { MdCalendarMonth, MdEdit, MdFileDownload, MdLibraryBooks } from "react-icons/md";
 import {
-  BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label,
 } from "recharts";
-import { useAuth } from '../../contexts/AuthContext';
+
 
 // Type Definitions
 type DoctorProfile = {
@@ -27,12 +26,14 @@ type Session = {
 type Task = { text: string; done: boolean };
 type Resource = { title: string; type: "PDF" | "Video" | "Worksheet"; url: string };
 
+
 // Sample Data
 const avatars: Record<string, string> = {
   "Sarah Miller": "https://randomuser.me/api/portraits/women/44.jpg",
   "Michael Brown": "https://randomuser.me/api/portraits/men/32.jpg",
   "Emily Chen": "https://randomuser.me/api/portraits/women/65.jpg",
 };
+
 
 const defaultProfile: DoctorProfile = {
   name: "Dr. Amelia Carter",
@@ -43,6 +44,7 @@ const defaultProfile: DoctorProfile = {
   location: "San Francisco, CA",
   avatar: "https://randomuser.me/api/portraits/women/48.jpg"
 };
+
 
 const sessionsDataDefault: Session[] = [
   {
@@ -64,6 +66,7 @@ const sessionsDataDefault: Session[] = [
     status: "Confirmed",
   },
 ];
+
 
 // Crisis Banner
 const CrisisBanner: React.FC<{ onRespondNow: () => void }> = ({ onRespondNow }) => (
@@ -91,36 +94,32 @@ const CrisisBanner: React.FC<{ onRespondNow: () => void }> = ({ onRespondNow }) 
   </div>
 );
 
+
 // Doctor Details with Edit
 const DoctorDetails: React.FC<{
-  user: any;
+  profile: DoctorProfile;
   onEdit: () => void;
-}> = ({ user, onEdit }) => (
+}> = ({ profile, onEdit }) => (
   <header className="py-7 mb-4 flex items-center">
-    {user?.avatar?.url ? (
-      <img
-        src={user.avatar.url}
-        alt={user.fullName}
-        className="rounded-full w-16 h-16 mr-6 object-cover border"
-      />
-    ) : (
-      <div className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xl mr-6">
-        {user?.firstName?.[0] || 'D'}
-      </div>
-    )}
+    <img
+      src={profile.avatar}
+      alt={profile.name}
+      className="rounded-full w-16 h-16 mr-6 object-cover border"
+    />
     <div>
       <div className="flex gap-2 items-center">
-        <h1 className="text-3xl font-bold text-gray-900">{user?.fullName || 'Dr. Counselor'}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{profile.name}</h1>
         <button className="p-1 rounded hover:bg-gray-100" onClick={onEdit}>
           <MdEdit size={22} />
         </button>
       </div>
-      <p className="text-lg text-gray-600">{user?.role === 'counselor' ? 'Licensed Counselor' : 'Psychologist'}</p>
-      <p className="text-md text-gray-500">License No: {user?.licenseNumber || 'N/A'} | {user?.email || 'email@example.com'}</p>
-      <p className="text-sm text-gray-400 mt-1">Experience: {user?.experience ? `${user.experience} years` : 'N/A'} | Specialization: {user?.specialization?.join(', ') || 'General'}</p>
+      <p className="text-lg text-gray-600">{profile.type}</p>
+      <p className="text-md text-gray-500">License No: {profile.license} | {profile.email}</p>
+      <p className="text-sm text-gray-400 mt-1">Experience: {profile.experience} | Location: {profile.location}</p>
     </div>
   </header>
 );
+
 
 // Profile Edit Modal
 const ProfileEditModal: React.FC<{
@@ -128,7 +127,8 @@ const ProfileEditModal: React.FC<{
   onClose: () => void;
   onSave: (p: DoctorProfile) => void;
 }> = ({ profile, onClose, onSave }) => {
-  const [edited, setEdited] = useState<DoctorProfile>(profile);
+  const [edited, setEdited] = React.useState<DoctorProfile>(profile);
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
@@ -153,6 +153,7 @@ const ProfileEditModal: React.FC<{
   );
 };
 
+
 // Overview Card
 const OverviewCard: React.FC<{ icon: React.ReactNode; title: string; value: number }> = ({ icon, title, value }) => (
   <div className="flex flex-col items-center bg-white rounded-2xl shadow p-7 min-w-[200px] w-full">
@@ -162,7 +163,7 @@ const OverviewCard: React.FC<{ icon: React.ReactNode; title: string; value: numb
   </div>
 );
 
-// Overview
+
 const Overview: React.FC = () => (
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
     <OverviewCard icon={<FaUserMd size={36} color="#5B32F3" />} title="Active Clients" value={25} />
@@ -171,7 +172,8 @@ const Overview: React.FC = () => (
   </div>
 );
 
-// Analytics
+
+// Session Trend Data
 const sessionTrends = [
   { name: "Mon", sessions: 2 },
   { name: "Tue", sessions: 3 },
@@ -179,58 +181,89 @@ const sessionTrends = [
   { name: "Thu", sessions: 3 },
   { name: "Fri", sessions: 5 },
 ];
-const sessionTypeData = [
-  { name: "Individual", value: 45 },
-  { name: "Couples", value: 15 },
-  { name: "Family", value: 7 },
-];
-const COLORS = ["#6366F1", "#A3A3F7", "#38BDF8"];
 
-const DashboardAnalytics: React.FC = () => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+
+// Counselor Ratings Data (single rating per week)
+const counselorRatings = [
+  { name: "Week 1", rating: 4.5 },
+  { name: "Week 2", rating: 4.6 },
+  { name: "Week 3", rating: 4.7 },
+  { name: "Week 4", rating: 4.6 },
+];
+
+
+// Indigo gradient id constant for bar fill
+const indigoGradientId = "indigoGradient";
+
+
+const CounselorRatingChart: React.FC = () => {
+  const avgRating = (
+    counselorRatings.reduce((sum, r) => sum + r.rating, 0) / counselorRatings.length
+  ).toFixed(2);
+
+
+  return (
     <div className="bg-white rounded-2xl shadow p-6 w-full">
-      <h3 className="text-md font-semibold mb-4 text-gray-900">Sessions This Week</h3>
-      <ResponsiveContainer width="100%" height={160}>
-        <BarChart data={sessionTrends}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="name" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="sessions" fill="#6366F1" radius={[4, 4, 0, 0]} barSize={24} />
+      <h3 className="text-lg font-semibold mb-4 text-gray-900">
+        Counselor Ratings
+      </h3>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart
+          data={counselorRatings}
+          layout="vertical"
+          margin={{ top: 20, right: 40, left: 60, bottom: 20 }}
+          barCategoryGap="40%"
+        >
+          <defs>
+            <linearGradient id={indigoGradientId} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#6366F1" />
+              <stop offset="100%" stopColor="#4F46E5" />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#EEF2FF" />
+          <XAxis
+            type="number"
+            domain={[0, 5]}
+            ticks={[0, 1, 2, 3, 4, 5]}
+            tickLine={false}
+            axisLine={false}
+            style={{ fontSize: 14 }}
+          >
+          </XAxis>
+          <YAxis
+            type="category"
+            dataKey="name"
+            axisLine={false}
+            tickLine={false}
+            style={{ fontSize: 14 }}
+          />
+          <Tooltip
+            formatter={(value: number) => value.toFixed(2)}
+            cursor={{ fill: "rgba(99,102,241,0.10)" }}
+          />
+          <Bar
+            dataKey="rating"
+            fill={`url(#${indigoGradientId})`}
+            radius={[8, 0, 0, 8]}
+            barSize={20}
+          />
         </BarChart>
       </ResponsiveContainer>
+      <div className="mt-5 text-center text-sm text-gray-700 font-medium">
+        Average Rating:{" "}
+        <span className="text-indigo-700 text-base font-bold">{avgRating}</span>
+      </div>
     </div>
-    <div className="bg-white rounded-2xl shadow p-6 w-full">
-      <h3 className="text-md font-semibold mb-4 text-gray-900">Session Types</h3>
-      <ResponsiveContainer width="100%" height={160}>
-        <PieChart>
-          <Pie
-            data={sessionTypeData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={55}
-            innerRadius={30}
-            label
-          >
-            {sessionTypeData.map((entry, idx) => (
-              <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-);
+  );
+};
 
-// Session Table with Search and Export
+
+// Sessions Table with Search and Export
 const SessionsTable: React.FC<{ sessions: Session[] }> = ({ sessions }) => {
   const exportCSV = () => {
-    const header = '"Name","Type","Date & Time","Status"\n';
+    const header = `"Name","Type","Date & Time","Status"\n`;
     const rows = sessions.map(
-      s => `"${s.name}","${s.type}","${s.date}","${s.status}" `
+      s => `"${s.name}","${s.type}","${s.date}","${s.status}"`
     ).join("\n");
     const csv = header + rows;
     const blob = new Blob([csv], { type: "text/csv" });
@@ -241,6 +274,7 @@ const SessionsTable: React.FC<{ sessions: Session[] }> = ({ sessions }) => {
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   return (
     <div className="bg-white rounded-xl shadow p-6 w-full mt-6">
@@ -295,6 +329,7 @@ const SessionsTable: React.FC<{ sessions: Session[] }> = ({ sessions }) => {
   );
 };
 
+
 const SessionsSection: React.FC<{ sessions: Session[] }> = ({ sessions }) => {
   const [search, setSearch] = useState("");
   const filtered = sessions.filter(
@@ -315,6 +350,7 @@ const SessionsSection: React.FC<{ sessions: Session[] }> = ({ sessions }) => {
     </>
   );
 };
+
 
 // Recent Activity Timeline
 const activityData = [
@@ -355,6 +391,7 @@ const RecentActivity: React.FC = () => (
   </div>
 );
 
+
 // Notification Dropdown
 const notificationsDummy = [
   { msg: "Crisis Alert: Immediate Response Needed", time: "1 min ago" },
@@ -385,6 +422,7 @@ const NotificationDropdown: React.FC = () => {
     </div>
   );
 };
+
 
 // Tasks Widget
 const TasksWidget: React.FC = () => {
@@ -428,6 +466,7 @@ const TasksWidget: React.FC = () => {
   );
 };
 
+
 // Resources Library with type select dropdown and add resource form
 const ResourcesLibrary: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([
@@ -438,16 +477,20 @@ const ResourcesLibrary: React.FC = () => {
     { title: "Relaxation Techniques Video", type: "Video", url: "#" },
   ]);
 
+
   const [selectedTab, setSelectedTab] = useState<string>("All");
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState<string>("");
   const [newUrl, setNewUrl] = useState("");
 
+
   const tabs = ["All", "PDF", "Video", "Worksheet"];
+
 
   const filteredResources = selectedTab === "All"
     ? resources
     : resources.filter(r => r.type === selectedTab);
+
 
   const addResource = () => {
     if (!newTitle.trim() || !newType.trim() || !newUrl.trim()) {
@@ -460,6 +503,7 @@ const ResourcesLibrary: React.FC = () => {
     setNewUrl("");
     setSelectedTab(newType);
   };
+
 
   return (
     <div className="bg-white rounded-xl shadow p-6 mt-8 w-full">
@@ -518,45 +562,50 @@ const ResourcesLibrary: React.FC = () => {
   );
 };
 
-// Main Dashboard Component
+
+// Dashboard component that combines all parts
 const CounselorDashboard: React.FC = () => {
-  const { user, loading } = useAuth(); // Get user data from context
   const [profile, setProfile] = useState(defaultProfile);
   const [editOpen, setEditOpen] = useState(false);
+
 
   const handleRespondNow = () => {
     alert("Opening crisis intervention workflow!");
   };
 
-  // Show loading state while user data is being fetched
-  if (loading) {
-    return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <main className="max-w-6xl mx-auto px-8 py-8">
         <div className="flex justify-between items-center">
-          <DoctorDetails user={user} onEdit={() => setEditOpen(true)} />
+          <DoctorDetails profile={profile} onEdit={() => setEditOpen(true)} />
           <NotificationDropdown />
         </div>
-        {editOpen &&
+        {editOpen && (
           <ProfileEditModal
             profile={profile}
             onClose={() => setEditOpen(false)}
             onSave={edited => { setProfile(edited); setEditOpen(false); }}
           />
-        }
+        )}
         <CrisisBanner onRespondNow={handleRespondNow} />
         <Overview />
-        <DashboardAnalytics />
+        {/* Dashboard Analytics section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          <div className="bg-white rounded-2xl shadow p-6 w-full">
+            <h3 className="text-md font-semibold mb-4 text-gray-900">Sessions This Week</h3>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={sessionTrends}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="sessions" fill="#6366F1" radius={[4, 4, 0, 0]} barSize={24} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <CounselorRatingChart />
+        </div>
         <SessionsSection sessions={sessionsDataDefault} />
         <RecentActivity />
         <TasksWidget />
@@ -565,5 +614,6 @@ const CounselorDashboard: React.FC = () => {
     </div>
   );
 };
+
 
 export default CounselorDashboard;

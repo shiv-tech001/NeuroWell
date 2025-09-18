@@ -41,6 +41,9 @@ class MoodService {
 
   private async makeRequest(url: string, options: RequestInit = {}): Promise<any> {
     const token = this.getToken();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -48,24 +51,51 @@ class MoodService {
         ...options.headers,
       },
       ...options,
+      signal: controller.signal,
     };
 
     try {
       const response = await fetch(`${API_BASE_URL}${url}`, config);
-      const data = await response.json();
-
+      
+      // Clear the timeout since we got a response
+      clearTimeout(timeoutId);
+      
+      // Handle non-OK responses
       if (!response.ok) {
-        if (data.errors && Array.isArray(data.errors)) {
-          const errorMessage = data.errors.map((err: any) => err.msg).join(', ');
+        // Try to parse error response, but don't fail if it's not JSON
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        if (errorData?.errors && Array.isArray(errorData.errors)) {
+          const errorMessage = errorData.errors.map((err: any) => err.msg).join(', ');
           throw new Error(errorMessage);
         }
-        throw new Error(data.message || 'An error occurred');
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
+
+      // Parse successful response
+      const data = await response.json().catch(e => {
+        console.error('Failed to parse JSON response:', e);
+        throw new Error('Invalid response from server');
+      });
 
       return data;
     } catch (error) {
+      // Clear timeout in case of error
+      clearTimeout(timeoutId);
+      
+      // Handle abort specifically
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('Request timed out');
+        throw new Error('Request timed out. Please check your connection and try again.');
+      }
+      
       console.error('Mood API request failed:', error);
-      throw error;
+      throw error instanceof Error ? error : new Error('An unknown error occurred');
     }
   }
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
+import { v4 as uuidv4 } from 'uuid';
+import { sendMessageToAI as sendChatMessage } from '../../services/chatService';
 
 // Icon Components
 const SendIcon = ({ className }: { className?: string }) => (
@@ -11,7 +11,7 @@ const SendIcon = ({ className }: { className?: string }) => (
 
 const MicrophoneIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd"/>
+        <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 715 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd"/>
     </svg>
 );
 
@@ -34,63 +34,139 @@ interface Message {
 interface Session {
     id: string;
     title: string;
-    timestamp: string;
+    messages: Message[];
 }
 
-const AIChatbotPage: React.FC = () => {
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: '1',
-            type: 'assistant',
-            content: "Hello! I'm your friendly AI assistant. How are you feeling today? I'm here to listen and help.",
-            timestamp: '10:30 AM',
-        }
-    ]);
-
+const Chatboat: React.FC = () => {
+    // State variables
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [allSessions, setAllSessions] = useState<Session[]>([{
+        id: uuidv4(),
+        title: 'Welcome Chat',
+        messages: [
+            {
+                id: uuidv4(),
+                type: 'assistant',
+                content: "Hello! I'm your friendly AI assistant. How are you feeling today? I'm here to listen and help.",
+                timestamp: '10:30 AM',
+            }
+        ],
+    }]);
+    const [activeSessionId, setActiveSessionId] = useState<string | null>(allSessions[0]?.id || null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [currentMessage, setCurrentMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
+    const messagesScrollRef = useRef<HTMLDivElement>(null);
+    const prevMessagesLengthRef = useRef(0);
 
-    const sessions: Session[] = [
-        { id: '1', title: 'Check-in', timestamp: '10:30 AM' },
-        { id: '2', title: 'Stress Management', timestamp: 'Yesterday, 2:15 PM' },
-        { id: '3', title: 'Anxiety Relief', timestamp: '2 days ago, 11:00 AM' },
-    ];
+    // Rename session
+    const handleRenameSession = (sessionId: string, newName: string) => {
+        setAllSessions(prev => prev.map(s =>
+            s.id === sessionId ? { ...s, title: newName } : s
+        ));
+        setOpenDropdownId(null);
+    };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Delete session
+    const handleDeleteSession = (sessionId: string) => {
+        setAllSessions(prev => {
+            const filtered = prev.filter(s => s.id !== sessionId);
+            // If deleted session was active, set active to first or null
+            if (activeSessionId === sessionId) {
+                setActiveSessionId(filtered[0]?.id || null);
+            }
+            return filtered;
+        });
+        setOpenDropdownId(null);
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        if (allSessions.length && activeSessionId === null) {
+            setActiveSessionId(allSessions[0].id);
+        }
+    }, [allSessions, activeSessionId]);
+
+    // Get active session messages
+    const activeSession = allSessions.find(s => s.id === activeSessionId);
+    const messages = activeSession ? activeSession.messages : [];
+
+    // Only scroll to bottom when messages are added, not on initial load or session switch
+    useEffect(() => {
+        if (shouldScrollToBottom && messagesScrollRef.current) {
+            messagesScrollRef.current.scrollTop = messagesScrollRef.current.scrollHeight;
+            setShouldScrollToBottom(false);
+        }
+        
+        // Update the previous messages length
+        prevMessagesLengthRef.current = messages.length;
+    }, [messages, shouldScrollToBottom]);
+
+    // Watch for new messages being added to trigger scroll
+    useEffect(() => {
+        if (messages.length > prevMessagesLengthRef.current) {
+            setShouldScrollToBottom(true);
+        }
+    }, [messages.length]);
 
     const handleSendMessage = async () => {
-        if (!currentMessage.trim()) return;
-
+        if (!currentMessage.trim() || !activeSessionId) return;
+        
         const userMessage: Message = {
-            id: Date.now().toString(),
+            id: uuidv4(),
             type: 'user',
             content: currentMessage,
             timestamp: 'You',
         };
-
-        setMessages(prev => [...prev, userMessage]);
+        
+        setAllSessions(prev => prev.map(s =>
+            s.id === activeSessionId
+                ? { ...s, messages: [...s.messages, userMessage] }
+                : s
+        ));
+        const messageToSend = currentMessage;
         setCurrentMessage('');
         setIsTyping(true);
-
-        // Simulate AI response
-        setTimeout(() => {
-            const aiResponse: Message = {
-                id: (Date.now() + 1).toString(),
+        
+        // Trigger scroll for user message
+        setShouldScrollToBottom(true);
+        
+        try {
+            const chatResponse = await sendChatMessage(messageToSend, messages);
+            if (chatResponse.success && chatResponse.data) {
+                const aiResponse: Message = {
+                    id: uuidv4(),
+                    type: 'assistant',
+                    content: chatResponse.data.response,
+                    timestamp: 'AI Assistant',
+                    suggestions: chatResponse.data.suggestions,
+                };
+                setAllSessions(prev => prev.map(s =>
+                    s.id === activeSessionId
+                        ? { ...s, messages: [...s.messages, aiResponse] }
+                        : s
+                ));
+            } else {
+                throw new Error('Failed to get response from AI');
+            }
+        } catch (error) {
+            console.error("Failed to send message:", error);
+            const errorResponse: Message = {
+                id: uuidv4(),
                 type: 'assistant',
-                content: "I understand. It's common to feel overwhelmed. We can explore some strategies to manage stress. 😊",
+                content: "Sorry, I'm having trouble connecting. Please try again later.",
                 timestamp: 'AI Assistant',
-                suggestions: ['Mindfulness exercises', 'Talk to a peer']
             };
-            setMessages(prev => [...prev, aiResponse]);
+            setAllSessions(prev => prev.map(s =>
+                s.id === activeSessionId
+                    ? { ...s, messages: [...s.messages, errorResponse] }
+                    : s
+            ));
+        } finally {
             setIsTyping(false);
-        }, 1500);
+            // Trigger scroll for AI response
+            setShouldScrollToBottom(true);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -104,157 +180,211 @@ const AIChatbotPage: React.FC = () => {
         setCurrentMessage(suggestion);
     };
 
+    // Handle session switching without auto-scroll
+    const handleSessionClick = (sessionId: string) => {
+        setActiveSessionId(sessionId);
+        // Don't trigger auto-scroll when switching sessions
+        setShouldScrollToBottom(false);
+    };
+
+    // Handle new session creation
+    const handleCreateNewSession = () => {
+        const newSession: Session = {
+            id: uuidv4(),
+            title: 'New Chat',
+            messages: [
+                {
+                    id: uuidv4(),
+                    type: 'assistant',
+                    content: "Hello! I'm your friendly AI assistant. How are you feeling today? I'm here to listen and help.",
+                    timestamp: '10:30 AM',
+                }
+            ],
+        };
+        setAllSessions(prev => [newSession, ...prev]);
+        setActiveSessionId(newSession.id);
+        // Don't auto-scroll for new sessions
+        setShouldScrollToBottom(false);
+    };
+
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            
-
-            {/* Main Content */}
-            <div className="flex-1 flex">
-                {/* Sidebar - Session History */}
-                <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-                    <div className="p-6 border-b border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-900">Session History</h2>
-                    </div>
-                    
-                    <div className="flex-1 overflow-y-auto">
-                        {sessions.map((session, index) => (
-                            <div key={session.id} className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${index === 0 ? 'bg-purple-50 border-l-4 border-l-purple-600' : ''}`}>
-                                <h3 className="font-semibold text-gray-900">{session.title}</h3>
-                                <p className="text-sm text-gray-500 mt-1">{session.timestamp}</p>
-                            </div>
-                        ))}
-                    </div>
+        <div className="h-screen bg-gray-50 flex overflow-hidden relative">
+            {/* Sidebar for larger screens */}
+            <div className="hidden md:flex w-80 bg-white border-r border-gray-200 flex-col">
+                {/* Sidebar content */}
+                <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-900">Session History</h2>
+                    <button
+                        onClick={handleCreateNewSession}
+                        className="ml-2 p-2 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-600"
+                        title="New Chat"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
                 </div>
-
-                {/* Chat Area */}
-                <div className="flex-1 flex flex-col">
-                    {/* Chat Header */}
-                    <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" 
-                                    alt="AI Assistant" 
-                                    className="w-10 h-10 rounded-full"
-                                />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900">AI Assistant</h3>
-                                <div className="flex items-center">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                    <span className="text-sm text-gray-500">Online</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                        {messages.map((message) => (
-                            <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`flex items-start space-x-3 max-w-3xl ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                                    {/* Avatar */}
-                                    <div className="flex-shrink-0">
-                                        {message.type === 'assistant' ? (
-                                            <img 
-                                                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" 
-                                                alt="AI Assistant" 
-                                                className="w-10 h-10 rounded-full"
-                                            />
-                                        ) : (
-                                            <img 
-                                                src="https://images.unsplash.com/photo-1494790108755-2616b612b3fd?w=40&h=40&fit=crop&crop=face" 
-                                                alt="You" 
-                                                className="w-10 h-10 rounded-full"
-                                            />
-                                        )}
-                                    </div>
-
-                                    {/* Message Content */}
-                                    <div className={`flex flex-col ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
-                                        <div className={`px-4 py-3 rounded-2xl max-w-md ${
-                                            message.type === 'user' 
-                                                ? 'bg-purple-600 text-white' 
-                                                : 'bg-gray-100 text-gray-900'
-                                        }`}>
-                                            <p className="text-sm">{message.content}</p>
-                                        </div>
-                                        
-                                        {/* Timestamp */}
-                                        <span className="text-xs text-gray-500 mt-1 px-2">{message.timestamp}</span>
-                                        
-                                        {/* Suggestions */}
-                                        {message.suggestions && (
-                                            <div className="flex flex-wrap gap-2 mt-3">
-                                                {message.suggestions.map((suggestion, index) => (
-                                                    <button
-                                                        key={index}
-                                                        onClick={() => handleSuggestionClick(suggestion)}
-                                                        className="px-3 py-1 text-sm bg-white border border-purple-200 text-purple-600 rounded-full hover:bg-purple-50 transition"
-                                                    >
-                                                        {suggestion}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Typing Indicator */}
-                        {isTyping && (
-                            <div className="flex justify-start">
-                                <div className="flex items-start space-x-3 max-w-3xl">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" 
-                                        alt="AI Assistant" 
-                                        className="w-10 h-10 rounded-full"
-                                    />
-                                    <div className="bg-gray-100 px-4 py-3 rounded-2xl">
-                                        <div className="flex space-x-1">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
-
-                    {/* Message Input */}
-                    <div className="bg-white border-t border-gray-200 p-6">
-                        <div className="flex items-center space-x-4">
-                            <div className="flex-1 relative">
-                                <input
-                                    type="text"
-                                    value={currentMessage}
-                                    onChange={(e) => setCurrentMessage(e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                    placeholder="Type your message..."
-                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                />
-                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    <MicrophoneIcon className="w-5 h-5" />
-                                </button>
-                            </div>
+                <div className="flex-1 overflow-y-auto">
+                    {allSessions.map((session) => (
+                        <div 
+                            key={session.id} 
+                            className={`relative p-4 border-b border-gray-100 flex items-center justify-between cursor-pointer ${session.id === activeSessionId ? 'bg-purple-50 border-l-4 border-l-purple-600' : 'hover:bg-gray-50'}`}
+                            onClick={() => handleSessionClick(session.id)}
+                        >
+                            <h3 className="font-semibold text-gray-900">{session.title}</h3>
                             <button
-                                onClick={handleSendMessage}
-                                disabled={!currentMessage.trim()}
-                                className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-1 rounded-full hover:bg-gray-200"
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    setOpenDropdownId(openDropdownId === session.id ? null : session.id);
+                                }}
                             >
-                                <SendIcon className="w-5 h-5" />
+                                {/* Three-dot icon */}
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <circle cx="5" cy="12" r="2" />
+                                    <circle cx="12" cy="12" r="2" />
+                                    <circle cx="19" cy="12" r="2" />
+                                </svg>
                             </button>
+                            {/* Dropdown menu */}
+                            {openDropdownId === session.id && (
+                                <div className="absolute right-8 top-10 z-10 bg-white border border-gray-200 rounded shadow-md py-1 w-32">
+                                    <button
+                                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            const newName = window.prompt('Enter new chat name:', session.title);
+                                            if (newName && newName.trim()) {
+                                                handleRenameSession(session.id, newName.trim());
+                                            } else {
+                                                setOpenDropdownId(null);
+                                            }
+                                        }}
+                                    >Rename</button>
+                                    <button
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            if (window.confirm('Are you sure you want to delete this chat?')) {
+                                                handleDeleteSession(session.id);
+                                            } else {
+                                                setOpenDropdownId(null);
+                                            }
+                                        }}
+                                    >Delete Chat</button>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
 
+            {/* Sidebar for mobile - drawer */}
+            {isSidebarOpen && (
+                <div className="fixed inset-0 z-30 md:hidden">
+                    <div className="absolute inset-0 bg-gray-600 opacity-75" onClick={() => setIsSidebarOpen(false)}></div>
+                    <div className="relative w-80 bg-white h-full border-r border-gray-200 flex flex-col">
+                        {/* Sidebar content */}
+                        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-gray-900">Session History</h2>
+                            <button
+                                onClick={handleCreateNewSession}
+                                className="ml-2 p-2 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-600"
+                                title="New Chat"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto">
+                            {allSessions.map((session) => (
+                                <div 
+                                    key={session.id} 
+                                    className={`relative p-4 border-b border-gray-100 flex items-center justify-between cursor-pointer ${session.id === activeSessionId ? 'bg-purple-50 border-l-4 border-l-purple-600' : 'hover:bg-gray-50'}`}
+                                    onClick={() => {
+                                        handleSessionClick(session.id);
+                                        setIsSidebarOpen(false);
+                                    }}
+                                >
+                                    <h3 className="font-semibold text-gray-900">{session.title}</h3>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             
+            {/* Main Chat Area */}
+            <div className="flex-1 flex flex-col h-screen">
+                {/* Header with menu button for mobile */}
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between md:hidden">
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-md text-gray-500 hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                    <h2 className="text-lg font-bold text-gray-900">
+                        {activeSession ? activeSession.title : 'Chat'}
+                    </h2>
+                    <div className="w-8"></div> {/* Spacer */}
+                </div>
+
+                {/* Chat messages */}
+                <div ref={messagesScrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 bg-gray-50" style={{ minHeight: 0 }}>
+                    {messages.map(msg => (
+                        <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-lg px-4 py-2 rounded-lg shadow ${msg.type === 'user' ? 'bg-purple-600 text-white' : 'bg-white text-gray-900 border'}`}>
+                                <div className="text-sm">{msg.content}</div>
+                                <div className="text-xs text-gray-400 mt-1">{msg.timestamp}</div>
+                                {msg.suggestions && (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {msg.suggestions.map(suggestion => (
+                                            <button key={suggestion} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200" onClick={() => handleSuggestionClick(suggestion)}>
+                                                {suggestion}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                    {isTyping && (
+                        <div className="flex justify-start items-end">
+                            <div className="flex items-end mr-2">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center border border-purple-300">
+                                    <UserIcon className="h-6 w-6 text-purple-600" />
+                                </div>
+                            </div>
+                            <div className="max-w-lg px-4 py-2 rounded-lg shadow bg-white text-gray-900 border animate-pulse">
+                                <div className="text-sm">AI Assistant is typing...</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                
+                {/* Message input */}
+                <div className="p-4 md:p-6 border-t border-gray-200 flex items-center gap-4 bg-white">
+                    <textarea
+                        className="flex-1 resize-none rounded-lg border border-gray-300 p-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        rows={1}
+                        placeholder="Type your message..."
+                        value={currentMessage}
+                        onChange={e => setCurrentMessage(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                    />
+                    <button
+                        className="p-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleSendMessage}
+                        disabled={!currentMessage.trim() || isTyping}
+                        title="Send"
+                    >
+                        <SendIcon className="h-5 w-5" />
+                    </button>
+                </div>
+            </div>
         </div>
     );
-};
+}
 
-export default AIChatbotPage;
+export default Chatboat;

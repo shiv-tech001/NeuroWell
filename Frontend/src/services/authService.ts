@@ -55,9 +55,11 @@ class AuthService {
   }
 
   private async makeRequest(url: string, options: RequestInit = {}): Promise<any> {
+    const isFormData = options.body instanceof FormData;
+
     const config: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        ...(!isFormData && { 'Content-Type': 'application/json' }),
         ...(this.token && { Authorization: `Bearer ${this.token}` }),
         ...options.headers,
       },
@@ -146,6 +148,31 @@ class AuthService {
       this.logout();
       return null;
     }
+  }
+
+  async getProfile(): Promise<any> {
+    return this.makeRequest('/users/profile');
+  }
+
+  async updateProfile(data: any): Promise<any> {
+    return this.makeRequest('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async uploadAvatar(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    return this.makeRequest('/users/avatar', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Let the browser set the Content-Type header for FormData
+        'Content-Type': undefined,
+      },
+    });
   }
 
   async logout(): Promise<void> {
